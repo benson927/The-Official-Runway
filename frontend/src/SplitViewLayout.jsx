@@ -43,10 +43,11 @@ const SplitViewLayout = ({
   onSelectSeason,
   runwayFading = false,
 
-  // 極簡動態快捷推薦屬性
+  // 極極動態快捷推薦屬性
   shortcuts = [],
   onAddShortcut,
   onDeleteShortcut,
+  onReorderShortcuts,
 
   // Curator's Vault 屬性
   archivedLooks,
@@ -72,6 +73,32 @@ const SplitViewLayout = ({
 
   // V5.4 本地動畫控制狀態：儲存正在進行「寬度收縮與淡出」動畫的品牌 value
   const [deletingShortcuts, setDeletingShortcuts] = useState([]);
+
+  // 品牌快捷列水平拖曳重排狀態
+  const [draggedIndex, setDraggedIndex] = useState(null);
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newShortcuts = [...shortcuts];
+    const [draggedItem] = newShortcuts.splice(draggedIndex, 1);
+    newShortcuts.splice(index, 0, draggedItem);
+    
+    if (onReorderShortcuts) {
+      onReorderShortcuts(newShortcuts);
+    }
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   // V7.6 物理引擎：暗房顯影動畫 Scope 參照
   const containerRef = useRef();
@@ -373,12 +400,22 @@ const SplitViewLayout = ({
                   const isActive = currentDesigner === d.value;
                   return (
                     <React.Fragment key={d.value}>
-                      {index > 0 && <span className="text-neutral-200">.</span>}
-                      <div className="flex items-center gap-0.5 group">
+                      {index > 0 && <span className="text-neutral-200 select-none">.</span>}
+                      <div 
+                        draggable="true"
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className={`flex items-center gap-0.5 group transition-all duration-300 ${
+                          index === draggedIndex 
+                            ? 'opacity-30 cursor-grabbing' 
+                            : 'cursor-grab'
+                        }`}
+                      >
                         <button
                           onClick={() => onFetchRunway(d.value)}
                           disabled={runwayLoading}
-                          className={`transition-colors font-sans font-black tracking-widest uppercase cursor-pointer border-none bg-transparent ${
+                          className={`transition-colors font-sans font-black tracking-widest uppercase border-none bg-transparent cursor-pointer ${
                             isActive ? 'text-neutral-950 font-black' : 'text-neutral-400 hover:text-neutral-950'
                           }`}
                         >

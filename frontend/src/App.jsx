@@ -209,6 +209,11 @@ function App() {
     showToast("SHORTCUT REMOVED");
   };
 
+  // 品牌快捷列重新排序
+  const handleReorderShortcuts = (newShortcuts) => {
+    setShortcuts(newShortcuts);
+  };
+
   // ==========================================
   // V7.0 Oracle Vision AI 視覺引擎分析
   // ==========================================
@@ -513,6 +518,7 @@ function App() {
         shortcuts={shortcuts}
         onAddShortcut={handleAddShortcut}
         onDeleteShortcut={handleDeleteShortcut}
+        onReorderShortcuts={handleReorderShortcuts}
       />
 
       {/* 🔍 V5.8 全螢幕沉浸式細部放大鏡 Portal */}
