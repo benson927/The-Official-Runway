@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 import DefrostCard from './DefrostCard';
 import VaultBoard from './VaultBoard';
 
@@ -58,6 +62,131 @@ const SplitViewLayout = ({
 
   // V5.4 本地動畫控制狀態：儲存正在進行「寬度收縮與淡出」動畫的品牌 value
   const [deletingShortcuts, setDeletingShortcuts] = useState([]);
+
+  // V7.6 物理引擎：暗房顯影動畫 Scope 參照
+  const containerRef = useRef();
+
+  // V7.6.2 & V7.7 基於官方 .gsap-rules.md 與 .cursorrules 對齊之 React 最佳實踐
+  // - 使用 scope: containerRef 隔離選擇器，確保無全局 DOM 污染
+  // - 透過 useGSAP 的 dependencies 機制，在 view 或數據變更時安全重新執行
+  // - 啟用 overwrite: 'auto' 避免快速切換造成的 tween 重疊衝突與記憶體洩漏
+  // - 導入 The Fluid Grid 物理推擠特效，對 images 的 scale 進行物理微距放大，並使用 requestAnimationFrame 與狀態 Map 快取進行效能防禦。
+  useGSAP((context, contextSafe) => {
+    // 🟢 1. 骨牌進場顯影動畫 (The Darkroom Reveal)
+    if (activeView === 'runway' && runwayLooks.length > 0) {
+      const cards = gsap.utils.toArray('.runway-card-gsap');
+      if (cards.length > 0) {
+        gsap.fromTo(cards, 
+          { 
+            opacity: 0, 
+            filter: 'blur(12px)', 
+            y: 30 
+          },
+          { 
+            opacity: 1, 
+            filter: 'blur(0px)', 
+            y: 0, 
+            duration: 0.8, 
+            ease: "power3.out", 
+            stagger: 0.04,
+            overwrite: 'auto'
+          }
+        );
+      }
+    }
+
+    // 🔵 2. The Fluid Grid 物理推擠特效 (滑鼠追蹤與漣漪放大)
+    if (activeView !== 'runway' || runwayLooks.length === 0) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    // 取得所有圖片的 DOM 節點
+    const images = gsap.utils.toArray('.defrost-card-img', container);
+    if (images.length === 0) return;
+
+    // 用 Map 記錄每個圖片目前的物理 scale，避免重複調用 gsap.to 導致卡頓 (Performance Throttling)
+    const currentScales = new Map();
+    images.forEach(img => currentScales.set(img, 1));
+
+    let ticking = false;
+
+    // 物理距離運算與節流函數
+    const handlePointerMove = contextSafe((e) => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const mx = e.clientX;
+          const my = e.clientY;
+          const maxDist = 380; // 滑鼠感應物理半徑 (px)
+
+          images.forEach(img => {
+            const rect = img.getBoundingClientRect();
+            // 計算圖片中心點
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const dist = Math.hypot(cx - mx, cy - my);
+
+            let targetScale = 1;
+            if (dist < maxDist) {
+              const factor = 1 - dist / maxDist; // 0 ~ 1
+              // 使用二次方平滑曲線，讓邊緣效果回彈更流暢
+              const smoothFactor = Math.pow(factor, 2);
+              targetScale = 1 + smoothFactor * 0.05; // 滑鼠正上方時最大 scale: 1.05
+            }
+
+            // 效能防禦：若變化幅度極小，或維持在 maxDist 外 (scale 仍為 1)，不呼叫 gsap.to
+            const prevScale = currentScales.get(img) || 1;
+            if (Math.abs(targetScale - prevScale) > 0.002) {
+              gsap.to(img, {
+                scale: targetScale,
+                duration: 0.8,
+                ease: "power3.out", // 極致絲滑的阻尼感恢復彈性
+                overwrite: "auto"
+              });
+              currentScales.set(img, targetScale);
+            }
+          });
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    // 當滑鼠離開 Runway 畫布時，全部還原
+    const handlePointerLeave = contextSafe(() => {
+      images.forEach(img => {
+        const prevScale = currentScales.get(img) || 1;
+        if (prevScale !== 1) {
+          gsap.to(img, {
+            scale: 1,
+            duration: 0.8,
+            ease: "power3.out",
+            overwrite: "auto"
+          });
+          currentScales.set(img, 1);
+        }
+      });
+    });
+
+    // 綁定事件監聽
+    container.addEventListener('pointermove', handlePointerMove);
+    container.addEventListener('pointerleave', handlePointerLeave);
+
+    // 清理函數 (Cleanup)：解除監聽並安全還原所有 Tween 狀態
+    return () => {
+      container.removeEventListener('pointermove', handlePointerMove);
+      container.removeEventListener('pointerleave', handlePointerLeave);
+      images.forEach(img => {
+        gsap.killTweensOf(img);
+        gsap.set(img, { scale: 1 });
+      });
+    };
+  }, { 
+    dependencies: [activeView, runwayLooks, currentDesigner, currentSeason], 
+    scope: containerRef,
+    revertOnUpdate: true 
+  });
 
   // 處理視角切換，300ms 動態交疊淡入淡出 (The Editorial Fade)
   const handleViewSwitch = (newView) => {
@@ -159,25 +288,11 @@ const SplitViewLayout = ({
             -ms-overflow-style: none;
             scrollbar-width: none;
           }
-          @keyframes darkroomReveal {
-            0% {
-              opacity: 0;
-              filter: blur(10px) grayscale(100%);
-              transform: translateY(16px);
-            }
-            100% {
-              opacity: 1;
-              filter: blur(0) grayscale(0);
-              transform: translateY(0);
-            }
-          }
-          .animate-darkroom-reveal {
-            animation: darkroomReveal 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          }
         `}</style>
 
         {/* 🟢 Runway 滿版畫布層 (絕對定位，獨立滾動，CLS = 0) */}
         <div
+          ref={containerRef}
           className="absolute inset-0 pt-24 overflow-y-auto custom-scrollbar defrost-gpu"
           style={{
             opacity: activeView === 'runway' ? 1 : 0,
@@ -371,11 +486,7 @@ const SplitViewLayout = ({
                     return (
                       <div 
                         key={look.look_number} 
-                        className="animate-darkroom-reveal"
-                        style={{
-                          animationDelay: `${index * 30}ms`,
-                          animationFillMode: 'both'
-                        }}
+                        className="runway-card-gsap opacity-0"
                       >
                         <DefrostCard 
                           look={look} 

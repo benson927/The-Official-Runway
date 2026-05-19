@@ -1,0 +1,11 @@
+# THE SILENT ARCHIVE - 全局 AI 開發規則
+
+## 1. 語言規範
+- 所有產生的程式碼註釋、文檔、說明以及對使用者的回覆，都必須使用中文。
+
+## 2. React + GSAP 開發規範 (基於 .gsap-rules.md 核心指導)
+- **嚴格限制**：在所有 React 組件中，**絕對禁止**使用傳統的 `useEffect` 來撰寫 GSAP 動畫。
+- **使用 Hook**：必須全面改用 `@gsap/react` 提供的 `useGSAP()` hook。這能完美避開 React Strict Mode 造成的動畫重複觸發與記憶體洩漏問題。
+- **動畫 Scope (作用域)**：在調用 `useGSAP` 時，必須指定 `scope`（通常透過對容器掛載 `useRef` 的引用來實作），限制選擇器僅在特定的 DOM 容器內生效，避免污染全局選擇器。
+- **正確清理 (Cleanup)**：動畫宣告時應利用 GSAP 的 `overwrite: 'auto'` 或在依賴項更新時確保先前的 Tween 被妥善重置或覆寫，以確保動畫表現的絲滑流暢度與記憶體安全。
+- **寫法一致性**：編寫 GSAP 指令時，專注於正確的 API 使用、防坑陷阱 (pitfalls) 與清理 (cleanup)，且保持精簡。

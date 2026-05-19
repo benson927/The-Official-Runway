@@ -12,13 +12,10 @@ import React, { useState } from 'react';
  */
 const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCurated }) => {
   const { image_url, look_number, season, designer } = look;
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div 
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={`defrost-card-container group cursor-pointer select-none transition-all duration-300 bg-transparent transform ${
         isActive ? 'scale-[1.01]' : ''
       }`}
@@ -35,9 +32,8 @@ const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCu
           src={image_url} 
           alt={`${designer} - ${season} - Look ${look_number}`}
           loading="lazy"
-          className="defrost-gpu w-full h-full object-cover transition-transform duration-300 ease-out transform rounded-none"
+          className="defrost-card-img defrost-gpu w-full h-full object-cover rounded-none"
           style={{
-            transform: isHovered ? 'scale(1.02) translate3d(0,0,0)' : 'scale(1) translate3d(0,0,0)',
             willChange: 'transform'
           }}
         />
