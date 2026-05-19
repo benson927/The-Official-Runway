@@ -132,15 +132,26 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
       }}
     >
       
-      {/* 🧬 蒙太奇閃影黑白高對比背景層 */}
+      {/* 🧬 蒙太奇閃影雙重背景層 (中央 Framed Portrait + 底層高斯模糊) */}
       {isMontageActive && (
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-75"
-          style={{
-            backgroundImage: `url(${MONTAGE_IMAGES[activeIndex]})`,
-            filter: 'grayscale(100%) contrast(160%) brightness(0.75)'
-          }}
-        />
+        <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
+          {/* 1. 底層：滿版高斯模糊光影 */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center transition-all duration-75 scale-110 opacity-30"
+            style={{
+              backgroundImage: `url(${MONTAGE_IMAGES[activeIndex]})`,
+              filter: 'grayscale(100%) blur(40px) brightness(0.5)'
+            }}
+          />
+          {/* 2. 前景：中央直式黃金比例時裝框 (完整全身 Look) */}
+          <div 
+            className="relative h-[80vh] aspect-[2/3] bg-cover bg-center border border-white/10 shadow-2xl transition-all duration-75 rounded-sm"
+            style={{
+              backgroundImage: `url(${MONTAGE_IMAGES[activeIndex]})`,
+              filter: 'grayscale(100%) contrast(150%) brightness(0.9)'
+            }}
+          />
+        </div>
       )}
 
       {/* 🔒 金庫門禁密碼鎖中央 UI (在蒙太奇結束後平滑浮現) */}
