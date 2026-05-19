@@ -35,7 +35,18 @@ function App() {
   // --- 左半屏 (Runway Side) 狀態 ---
   const [runwayLooks, setRunwayLooks] = useState([]);
   const [runwayLoading, setRunwayLoading] = useState(false);
-  const [currentDesigner, setCurrentDesigner] = useState('kiko-kostadinov');
+  const [currentDesigner, setCurrentDesigner] = useState(() => {
+    try {
+      const saved = localStorage.getItem('silent_archive_shortcuts');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.length > 0) return parsed[0].value;
+      }
+    } catch (e) {
+      console.error("無法動態讀取初始預設品牌:", e);
+    }
+    return 'maison-margiela';
+  });
   const [selectedLookId, setSelectedLookId] = useState(null);
 
   // V5.3 跨季度時光機狀態
@@ -458,8 +469,9 @@ function App() {
   // 初始化與生命週期
   // ==========================================
   useEffect(() => {
-    // 預設初始化載入：Kiko Kostadinov 秀場，展示極致高畫質 Looks
-    fetchRunwayLooks('kiko-kostadinov');
+    // 預設動態載入快捷列第一個品牌（左到右順序），確保解鎖後首頁與選單第一位完全對齊
+    const initialDesigner = shortcuts.length > 0 ? shortcuts[0].value : 'maison-margiela';
+    fetchRunwayLooks(initialDesigner);
   }, []);
 
   // 全局 Toast 提示調度
