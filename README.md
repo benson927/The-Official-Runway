@@ -1,62 +1,66 @@
-# 🏛 THE SILENT ARCHIVE // 啟動手冊 (V5.7)
+# THE SILENT ARCHIVE
 
-歡迎使用 **COP.VISION V5.7 "The Silent Archive"** 高級時裝雙屏私人金庫。
-本手冊為您提供了日常一鍵啟動指令、系統極簡架構亮點、以及資料庫維護的實用指南。
-
+[ IDENTITY ]
 ---
+一個專門用於高階時裝策展的私人金庫與 Oracle AI 視覺引擎。
+"The future isn't analog, it's archived."
 
-## 📌 快速一鍵啟動 (每次開啟必備)
+本系統專為純桌面端（Desktop-only）高階生產力工作站設計。為了追求大螢幕下的極致排版、物理流暢度與無干擾的專業工作環境，本系統廢除一切響應式妥協與移動端適配，僅在寬螢幕桌上型裝置中呈現完整視覺。
 
-請開啟兩個終端機 (Terminal) 視窗，分別一鍵複製並執行以下黃金指令：
 
-### 🧬 1. 後端伺服器 (Backend Server)
+[ ARCHITECTURE ]
+---
+系統採用高階非對稱式架構，將實時爬蟲、本地快取與雲端同步相結合：
+
+- **Frontend**: React + Vite 框架，搭配 Tailwind CSS（採用極簡無圓角設計，強調 Brutalist 的剛硬線條）。
+- **Physics & Animation**: 導入 GSAP 3 核心動畫引擎與 `@gsap/react` 規範，負責 Runway 滿版網格的暗房顯影與流體網格物理推擠特效。
+- **Backend & Crawler**: Python 3 與 Flask 輕量化微服務，整合實時 Vogue Runway 爬蟲系統、防錯網址解析與 YouTube 153 防拒絕播放安全映射。
+- **Database (Dual-Core)**:
+  - 本地快取層：SQLite 雙表資料庫結構（負責緩存時裝 Looks 與季度 Metadata，保證 0.1 秒極速冷啟動）。
+  - 雲端同步層：Supabase PostgreSQL 關係型資料庫，採用原生 TEXT[] 陣列進行跨裝置無縫雙向即時同步。
+- **AI Brain**: 多模態視覺模型（The Oracle Vision API），提供時裝圖像的面料材質、剪裁廓形、色彩美學與歷史歸檔標籤的自動化深度解析。
+
+
+[ PROTOCOLS ]
+---
+系統運行的核心互動與架構協議如下：
+
+- **Folderless Vault**: 放棄傳統資料夾與層級目錄結構，採用純粹的 `#TAG` 標籤過濾機制，搭配標籤自癒與自動化元數據排序。
+- **Full-Bleed Canvas**: 廢除傳統的雙屏切割，採用全局狀態切換的滿版畫布系統（The Runway 季度展台 / The Vault 情緒情緒板）。
+- **The Darkroom Reveal**: 摒棄生硬的常規載入，採用 GSAP 實作的骨牌式光學對焦與模糊淡入顯影動畫。
+- **The Margelia Spec**: 隱晦的邊緣特刊語錄系統。僅在特定品牌頁面激活，於 Runway 最底部呈現橫向極淡字句與紅色緩慢呼吸圓點（Devil's Pulse），取代喧鬧的傳統背景。
+
+
+[ INITIALIZATION ]
+---
+在開始部署之前，請複製專案根目錄的 `.env.example` 並將其命名為 `.env`，設定以下參數：
+```env
+# 門禁解鎖密碼
+VITE_VAULT_PASSCODE=BENSON
+
+# 雲端同步
+SUPABASE_URL=YOUR_SUPABASE_URL
+SUPABASE_KEY=YOUR_SUPABASE_KEY
+
+# AI 視覺解析
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+```
+
+依照以下序列啟動系統：
+
+### 1. 啟動後端服務
+後端服務啟動時將載入 The Silent CLI 規範，自動輸出當前的 SQLite 快取狀態與 API 端點：
 ```bash
-cd "/Users/bensonhong/Desktop/Antigravity專案/secondtool" && python3 backend/app.py
+python3 backend/app.py
 ```
-*   **運行端點**：`http://127.0.0.1:5001`
-*   **啟動速度**：**< 0.1 秒秒啟 🚀** (已移除所有定時輪詢與冷啟動負載)。
+- 後端預設運行端點：`http://127.0.0.1:5001`
 
-### 🖥 2. 前端開發伺服器 (Frontend Server)
+### 2. 啟動前端工作站
+進入前端目錄並啟動 Vite 開發伺服器：
 ```bash
-cd "/Users/bensonhong/Desktop/Antigravity專案/secondtool/frontend" && npm run dev
+cd frontend && npm run dev
 ```
-*   **訪問網址**：`http://localhost:5173/`
-*   **重載機制**：支援 Vite HMR 熱更新，代碼修改即時響應。
+- 前端工作站訪問網址：`http://localhost:5173/`
 
 ---
-
-## 💎 系統 V5.7 極簡冷淡美學架構
-
-為了追求極致的留白空氣感，系統已徹底掃除二手拍賣價格監控技術債，聚焦於以下兩大時裝靈感板塊：
-
-1.  **左半屏 (Runway Timeline)**：
-    *   **時光機引擎**：流暢切換 2025-2026 各大季度 Looks，具備本地 SQLite WAL 雙表高速快取。
-    *   **極簡官方社群橋接**：季度標題右側動態並排 `[ @品牌帳號 ↗ ]` 與時光機來源，無 Logo 純文字設計維持完美水平對齊。
-    *   **YouTube 153 防錯**：解析影片網址時，自動將 embed 轉換為標準 `watch?v=` 連結，徹底避免官方拒絕播放錯誤。
-2.  **右半屏 (The Vault Curator Board)**：
-    *   **離線持久化情緒板**：對左側大圖一鍵 `+ CURATE` 永久收藏，關閉網頁亦不遺失.
-    *   **動態標籤分類篩選**：為時裝 Look 標記自訂標籤，頂部自動生成極簡篩選鈕。
-    *   **自由卡片釋放**：Hover 時浮現 `- REMOVE` 優雅將 Look 從金庫中釋放。
-
----
-
-## ⚙️ 系統日常維護與優化指令
-
-### 🧹 1. 清除特定品牌快取 (強迫重新爬取)
-如果您希望強制後端重新去 Vogue 爬取特定品牌的最新季度與影音資訊，請在終端機執行以下 SQLite 清除命令（以 Prada 為例）：
-```bash
-sqlite3 "/Users/bensonhong/Desktop/Antigravity專案/secondtool/backend/runway_cache.db" \
-"delete from runway_cache_meta where designer='prada'; delete from runway_looks where designer='prada';"
-```
-
-### ☁️ 2. 釋放 Supabase 雲端資料庫空間
-大掃除後，系統已完全不依賴 Supabase。您可以打開 Supabase 平台，在 SQL Editor 中執行我們為您寫好的 [supabase_drop_tables.sql](./backend/supabase_drop_tables.sql) 腳本，徹底 Drop 舊版二手拍賣資料表：
-```sql
-DROP TABLE IF EXISTS products CASCADE;
-DROP TABLE IF EXISTS watchlist_items CASCADE;
-DROP TABLE IF EXISTS brands CASCADE;
-```
-
----
-
-*詳細升級紀錄與動態演示請參考走查報告：[walkthrough.md](./walkthrough.md)*
+走查報告與詳細修改細節：[walkthrough.md](./walkthrough.md)
