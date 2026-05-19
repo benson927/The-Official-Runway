@@ -35,15 +35,34 @@ const MONTAGE_IMAGES = [
  */
 const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
 
+  const [montageImages, setMontageImages] = useState(MONTAGE_IMAGES);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMontageActive, setIsMontageActive] = useState(true);
   const [passcodeInput, setPasscodeInput] = useState('');
   const [lockState, setLockState] = useState('LOCKED'); // LOCKED | GRANTED | DENIED
   const inputRef = useRef(null);
 
-  // 1. 圖片預加載 (Preload)，避免極速蒙太奇閃白屏，極致優化效能
+  // 1. 圖片打亂與預加載 (Preload)，避免極速蒙太奇閃白屏，極致優化效能與隨機藝術性
   useEffect(() => {
     if (isUnlocked) return;
+    
+    // Fisher-Yates Shuffle 演算法
+    const shuffleArray = (array) => {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+
+    const shuffled1 = shuffleArray(UNIQUE_MONTAGE_IMAGES);
+    const shuffled2 = shuffleArray(UNIQUE_MONTAGE_IMAGES);
+    const shuffled3 = shuffleArray(UNIQUE_MONTAGE_IMAGES).slice(0, 5);
+    const shuffledMontage = [...shuffled1, ...shuffled2, ...shuffled3];
+    
+    setMontageImages(shuffledMontage);
+
     UNIQUE_MONTAGE_IMAGES.forEach(url => {
       const img = new Image();
       img.src = url;
@@ -55,7 +74,7 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
     if (isUnlocked || !isMontageActive) return;
 
     const montageTimer = setInterval(() => {
-      setActiveIndex(prev => (prev + 1) % MONTAGE_IMAGES.length);
+      setActiveIndex(prev => (prev + 1) % montageImages.length);
     }, 120);
 
     // 3.0 秒後關閉蒙太奇，平滑進入密碼解鎖介面
@@ -132,25 +151,60 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
       }}
     >
       
-      {/* 🧬 蒙太奇閃影雙重背景層 (中央 Framed Portrait + 底層高斯模糊) */}
+      {/* 🧬 蒙太奇閃影雙重背景層 (中央 Framed Portrait + 底層高斯模糊 + 左右時裝藝廊排版) */}
       {isMontageActive && (
         <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
           {/* 1. 底層：滿版高斯模糊光影 */}
           <div 
             className="absolute inset-0 bg-cover bg-center transition-all duration-75 scale-110 opacity-30"
             style={{
-              backgroundImage: `url(${MONTAGE_IMAGES[activeIndex]})`,
+              backgroundImage: `url(${montageImages[activeIndex]})`,
               filter: 'grayscale(100%) blur(40px) brightness(0.5)'
             }}
           />
-          {/* 2. 前景：中央直式黃金比例時裝框 (完整全身 Look) */}
+
+          {/* 2. 左側：時裝藝廊 Show Notes */}
+          <div className="absolute left-[6vw] md:left-[8vw] top-0 bottom-0 flex flex-col items-center justify-center pointer-events-none z-10 select-none">
+            <span 
+              className="text-[10vh] font-serif font-black tracking-[0.4em] text-white/[0.02] uppercase select-none" 
+              style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+            >
+              SILENT
+            </span>
+            <div className="h-16 w-[1px] bg-white/10 my-4" />
+            <span 
+              className="text-[7.5px] font-serif tracking-[0.25em] text-white/20 uppercase whitespace-nowrap" 
+              style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+            >
+              KIKO KOSTADINOV // RTW F26
+            </span>
+          </div>
+
+          {/* 3. 前景：中央直式黃金比例時裝框 (完整全身 Look) */}
           <div 
-            className="relative h-[80vh] aspect-[2/3] bg-cover bg-center border border-white/10 shadow-2xl transition-all duration-75 rounded-sm"
+            className="relative h-[80vh] aspect-[2/3] bg-cover bg-center border border-white/10 shadow-2xl transition-all duration-75 rounded-sm z-20"
             style={{
-              backgroundImage: `url(${MONTAGE_IMAGES[activeIndex]})`,
+              backgroundImage: `url(${montageImages[activeIndex]})`,
               filter: 'grayscale(100%) contrast(150%) brightness(0.9)'
             }}
           />
+
+          {/* 4. 右側：時裝藝廊藝術語錄 */}
+          <div className="absolute right-[6vw] md:right-[8vw] top-0 bottom-0 flex flex-col items-center justify-center pointer-events-none z-10 select-none">
+            <span 
+              className="text-[10vh] font-serif font-black tracking-[0.4em] text-white/[0.02] uppercase select-none" 
+              style={{ transform: 'rotate(90deg)', transformOrigin: 'center' }}
+            >
+              ARCHIVE
+            </span>
+            <div className="h-16 w-[1px] bg-white/10 my-4" />
+            <span 
+              className="text-[7.5px] font-serif tracking-[0.25em] text-white/20 uppercase whitespace-nowrap" 
+              style={{ transform: 'rotate(90deg)', transformOrigin: 'center' }}
+            >
+              "WE ARCHIVE THE ARCHITECTURE OF DESIRE."
+            </span>
+          </div>
         </div>
       )}
 
