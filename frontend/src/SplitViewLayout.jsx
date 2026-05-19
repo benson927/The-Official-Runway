@@ -65,6 +65,9 @@ const SplitViewLayout = ({
 
   // V7.6 物理引擎：暗房顯影動畫 Scope 參照
   const containerRef = useRef();
+  // V7.8 Margelia Spec (邊緣特刊) 參照
+  const margeliaRef = useRef();
+  const pulseRef = useRef();
 
   // V7.6.2 & V7.7 基於官方 .gsap-rules.md 與 .cursorrules 對齊之 React 最佳實踐
   // - 使用 scope: containerRef 隔離選擇器，確保無全局 DOM 污染
@@ -89,6 +92,42 @@ const SplitViewLayout = ({
             duration: 0.8, 
             ease: "power3.out", 
             stagger: 0.04,
+            overwrite: 'auto'
+          }
+        );
+      }
+    }
+
+    // 🔴 3. Margelia Spec (穿著Prada的惡魔特刊) 呼吸顯影與惡魔脈搏
+    const isPrada = currentDesigner?.toLowerCase() === 'prada';
+    if (activeView === 'runway' && isPrada) {
+      if (margeliaRef.current) {
+        gsap.fromTo(margeliaRef.current, 
+          {
+            opacity: 0,
+            x: -20,
+            filter: "blur(5px)"
+          },
+          {
+            opacity: 1,
+            x: 0,
+            filter: "blur(0px)",
+            duration: 1.2,
+            ease: "power2.out",
+            delay: 0.5,
+            overwrite: 'auto'
+          }
+        );
+      }
+      if (pulseRef.current) {
+        gsap.fromTo(pulseRef.current,
+          { opacity: 0.1 },
+          {
+            opacity: 0.3,
+            duration: 2.5,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
             overwrite: 'auto'
           }
         );
@@ -181,6 +220,12 @@ const SplitViewLayout = ({
         gsap.killTweensOf(img);
         gsap.set(img, { scale: 1 });
       });
+      if (margeliaRef.current) {
+        gsap.killTweensOf(margeliaRef.current);
+      }
+      if (pulseRef.current) {
+        gsap.killTweensOf(pulseRef.current);
+      }
     };
   }, { 
     dependencies: [activeView, runwayLooks, currentDesigner, currentSeason], 
@@ -539,6 +584,31 @@ const SplitViewLayout = ({
           </div>
         </div>
       </main>
+
+      {/* 前端 V7.8 Margelia Spec (穿著Prada的惡魔特刊) */}
+      {activeView === 'runway' && currentDesigner?.toLowerCase() === 'prada' && (
+        <div 
+          ref={margeliaRef}
+          className="absolute left-6 md:left-10 top-1/2 -translate-y-1/2 flex items-center gap-4 select-none pointer-events-none origin-center text-neutral-400 font-serif"
+          style={{ 
+            transform: 'translateY(-50%) rotate(-90deg)',
+            writingMode: 'horizontal-tb',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <span className="font-black tracking-[0.25em] text-neutral-900 text-[8px]">
+            MARGELIA / [ DWP II ]
+          </span>
+          <span className="w-6 h-[1px] bg-neutral-300"></span>
+          <span className="tracking-[0.18em] text-[7.5px] text-neutral-400 uppercase">
+            "The future isn't analog, Andrea. It's archived. This vault is the architecture of desire."
+          </span>
+          <span 
+            ref={pulseRef}
+            className="w-[3px] h-[3px] bg-red-600 rounded-full opacity-10"
+          ></span>
+        </div>
+      )}
 
     </div>
   );
