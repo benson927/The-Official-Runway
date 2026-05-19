@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 全局高級時裝冷淡美學樣式表 — V5.0 */
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #F5F5F5; /* 冷淡極簡淺灰背景 */
+  color: #1A1A1A;            /* 高對比深邃黑文字 */
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 襯線體 - Playfair Display 用於 Header 標題與時裝元數據 */
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* 無襯線體 - Inter 用於 Body 本文、列表與說明 */
+.font-sans {
+  font-family: 'Inter', sans-serif;
+}
+
+/* 滾動條冷淡化 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #F5F5F5;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #E0E0E0;
+  border-radius: 2px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #1A1A1A;
+}
+
+/* 大面積冷淡風留白容器與網格 */
+.silent-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 4rem;
+}
+
+/* 冰霜卡片解凍 3D GPU 加速與 will-change 定義 */
+.defrost-gpu {
+  will-change: filter, transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* V7.0 Terminal Blinking Cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
