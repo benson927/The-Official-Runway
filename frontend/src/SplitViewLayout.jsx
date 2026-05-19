@@ -547,6 +547,27 @@ const SplitViewLayout = ({
                   })}
                 </div>
 
+                {/* 前端 V7.8 Margelia Spec (穿著Prada的惡魔特刊) - 水平頁尾註腳 */}
+                {activeView === 'runway' && currentDesigner?.toLowerCase() === 'prada' && (
+                  <div 
+                    ref={margeliaRef}
+                    className="mt-24 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-neutral-200 pt-6 pb-4 select-none text-neutral-400 font-serif opacity-0"
+                  >
+                    <span className="font-black tracking-[0.25em] text-neutral-900 text-[8px] uppercase">
+                      MARGELIA / [ DWP II ]
+                    </span>
+                    <div className="flex items-center gap-4">
+                      <span className="tracking-[0.18em] text-[7.5px] text-neutral-400 uppercase leading-relaxed text-left md:text-right max-w-xl">
+                        "The future isn't analog, Andrea. It's archived. This vault is the architecture of desire."
+                      </span>
+                      <span 
+                        ref={pulseRef}
+                        className="w-[3px] h-[3px] bg-red-600 rounded-full opacity-10 animate-pulse-slow"
+                      ></span>
+                    </div>
+                  </div>
+                )}
+
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-40 text-center border-2 border-dashed border-neutral-200 rounded-[3rem] bg-neutral-50/50 max-w-md mx-auto px-8 select-none">
@@ -584,31 +605,6 @@ const SplitViewLayout = ({
           </div>
         </div>
       </main>
-
-      {/* 前端 V7.8 Margelia Spec (穿著Prada的惡魔特刊) */}
-      {activeView === 'runway' && currentDesigner?.toLowerCase() === 'prada' && (
-        <div 
-          ref={margeliaRef}
-          className="absolute left-6 md:left-10 top-1/2 -translate-y-1/2 flex items-center gap-4 select-none pointer-events-none origin-center text-neutral-400 font-serif"
-          style={{ 
-            transform: 'translateY(-50%) rotate(-90deg)',
-            writingMode: 'horizontal-tb',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <span className="font-black tracking-[0.25em] text-neutral-900 text-[8px]">
-            MARGELIA / [ DWP II ]
-          </span>
-          <span className="w-6 h-[1px] bg-neutral-300"></span>
-          <span className="tracking-[0.18em] text-[7.5px] text-neutral-400 uppercase">
-            "The future isn't analog, Andrea. It's archived. This vault is the architecture of desire."
-          </span>
-          <span 
-            ref={pulseRef}
-            className="w-[3px] h-[3px] bg-red-600 rounded-full opacity-10"
-          ></span>
-        </div>
-      )}
 
     </div>
   );
