@@ -13,7 +13,8 @@ const BRAND_INSTAGRAM_HANDLES = {
   "kiko-kostadinov": "kikokostadinov",
   "prada": "prada",
   "enfants-riches-deprimes": "enfantsrichesdeprimes",
-  "acne-studios": "acnestudios"
+  "acne-studios": "acnestudios",
+  "miu-miu": "miumiu"
 };
 
 /**
@@ -59,6 +60,15 @@ const SplitViewLayout = ({
   
   // V7.2 全局切換器視角與極速過渡狀態
   const [activeView, setActiveView] = useState('runway');
+
+  // 取得品牌對應的 Instagram 帳號 (若無映射則以格式化後的品牌名稱作為 Fallback 自癒)
+  const getInstagramHandle = (designer) => {
+    if (!designer) return '';
+    if (BRAND_INSTAGRAM_HANDLES[designer]) {
+      return BRAND_INSTAGRAM_HANDLES[designer];
+    }
+    return designer.toLowerCase().replace(/[^a-z0-9]/g, '');
+  };
 
   // V5.4 本地動畫控制狀態：儲存正在進行「寬度收縮與淡出」動畫的品牌 value
   const [deletingShortcuts, setDeletingShortcuts] = useState([]);
@@ -482,14 +492,14 @@ const SplitViewLayout = ({
                     </div>
                     
                     <div className="flex items-center gap-4">
-                      {BRAND_INSTAGRAM_HANDLES[currentDesigner] && (
+                      {currentDesigner && (
                         <a
-                          href={`https://www.instagram.com/${BRAND_INSTAGRAM_HANDLES[currentDesigner]}/`}
+                          href={`https://www.instagram.com/${getInstagramHandle(currentDesigner)}/`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-neutral-400 hover:text-neutral-950 transition-colors duration-300 select-none whitespace-nowrap"
                         >
-                          [ @{BRAND_INSTAGRAM_HANDLES[currentDesigner].toUpperCase()} ↗ ]
+                          [ @{getInstagramHandle(currentDesigner).toUpperCase()} ↗ ]
                         </a>
                       )}
 
