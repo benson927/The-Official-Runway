@@ -65,7 +65,7 @@
 在開始部署之前，請複製專案根目錄的 `.env.example` 並將其命名為 `.env`，設定以下參數：
 
 ```env
-# 門禁解鎖密碼
+# 門禁解鎖密碼 (預設為 BENSON，解鎖後可在網頁頂部隨時自行修改)
 VITE_VAULT_PASSCODE=BENSON
 
 # 雲端同步
@@ -76,6 +76,12 @@ VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ```
+
+> [!TIP]
+> **關於金庫門禁密碼自定義修改**：
+> * **預設密碼**：`.env` 中的 `VITE_VAULT_PASSCODE` 為金庫的初始預設解鎖密碼。
+> * **線上即時修改**：成功解鎖進入金庫工作站後，您可以隨時點擊頂部導覽列右側的 `[ SET KEY ]` 按鈕，直接輸入您期望的新密碼並按下 Enter。
+> * **安全持久化與優先級**：您自定義的新密碼將會被安全地儲存在您本地瀏覽器的 `localStorage` 中。系統在未來進行安全驗證解鎖時，會**優先比對**您自訂的密碼；若無自訂密碼，才會降級比對 `.env` 設定檔中的密碼。這使您免於頻繁修改與暴露設定檔。
 
 ---
 
