@@ -11,6 +11,16 @@
 
 ---
 
+## 🎥 系統演示錄影 (System Demo Video)
+
+本專案包含了一段由開發者 **Benson** 親自錄製的操作演示影片。如果您是在 GitHub 網頁上閱讀此專案，可以直接在下方播放：
+
+<video src="Runway_record_show-1.mp4" width="100%" controls></video>
+
+*(註：若您是在本地端閱讀 Markdown，可以直接點擊連結播放此 [Runway_record_show-1.mp4](file:///Users/bensonhong/Desktop/Antigravity專案/Runway(行動平台期末個人)/Runway_record_show-1.mp4) 本地影片檔案)*
+
+---
+
 ## 🏛 核心系統架構 (Architecture)
 
 系統採用高階**非對稱式雙核架獲**，將實時秀場爬蟲、本地極速快取、雲端多端同步與 AI 識讀融為一體：
