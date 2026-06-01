@@ -1,0 +1,10 @@
+{
+  "name": "silent-archive-recorder",
+  "version": "1.0.0",
+  "description": "Automated system recorder for Silent Archive",
+  "main": "record.js",
+  "type": "module",
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

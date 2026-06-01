@@ -40,3 +40,7 @@ start_note.md
 start.sh
 backend.log
 frontend.log
+
+# 8. 暫存錄影與開發套件 (Scratch videos & node modules)
+scratch/node_modules/
+scratch/videos/
