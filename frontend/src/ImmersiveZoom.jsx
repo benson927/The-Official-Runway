@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 /**
  * ImmersiveZoom — 沉浸式布料細節放大鏡模態窗元件 (V5.8)
@@ -16,6 +16,31 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [isPlayOpen, setIsPlayOpen] = useState(false);
+  
+  // ✦ 客製化播放器控制狀態
+  const iframeRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const togglePlay = () => {
+    if (!iframeRef.current) return;
+    const command = isPlaying ? 'pauseVideo' : 'playVideo';
+    iframeRef.current.contentWindow.postMessage(
+      JSON.stringify({ event: 'command', func: command, args: '' }),
+      '*'
+    );
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleMute = () => {
+    if (!iframeRef.current) return;
+    const command = isMuted ? 'unMute' : 'mute';
+    iframeRef.current.contentWindow.postMessage(
+      JSON.stringify({ event: 'command', func: command, args: '' }),
+      '*'
+    );
+    setIsMuted(!isMuted);
+  };
 
   // 解析 YouTube 直連網址為無縫自動播放與靜音循環的 Embed 嵌入路徑 (V6.6)
   const getYouTubeEmbedUrl = (url) => {
@@ -27,7 +52,7 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
       videoId = match[2];
     }
     if (videoId) {
-      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playlist=${videoId}&loop=1&controls=1&modestbranding=1&rel=0`;
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playlist=${videoId}&loop=1&controls=0&modestbranding=1&rel=0&enablejsapi=1`;
     }
     return '';
   };
@@ -100,9 +125,10 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
           {videoUrl && isPlayOpen && embedUrl && (
             <div 
               onClick={(e) => e.stopPropagation()} 
-              className="absolute bottom-6 right-6 w-80 aspect-video rounded-3xl overflow-hidden border border-neutral-200 shadow-2xl bg-black z-20 transition-all duration-500 transform scale-100 hover:scale-[1.02]"
+              className="absolute bottom-6 right-6 w-80 aspect-video rounded-3xl overflow-hidden border border-neutral-200/20 shadow-2xl bg-black z-20 transition-all duration-500 transform scale-100 hover:scale-[1.02]"
             >
               <iframe
+                ref={iframeRef}
                 width="100%"
                 height="100%"
                 src={embedUrl}
@@ -110,8 +136,24 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover pb-9"
               ></iframe>
+              
+              {/* ✦ 獨家研發的高奢極簡 Brutalist 播放器控制列 */}
+              <div className="absolute bottom-0 left-0 w-full bg-neutral-950/90 backdrop-blur-md py-2.5 px-6 flex items-center justify-between z-30 select-none border-t border-neutral-800/20">
+                <button
+                  onClick={togglePlay}
+                  className="font-sans text-[9px] font-black tracking-widest text-white hover:text-neutral-300 transition-colors bg-transparent border-none cursor-pointer"
+                >
+                  {isPlaying ? '[ PAUSE ]' : '▶ [ PLAY ]'}
+                </button>
+                <button
+                  onClick={toggleMute}
+                  className="font-sans text-[9px] font-black tracking-widest text-white hover:text-neutral-300 transition-colors bg-transparent border-none cursor-pointer"
+                >
+                  {isMuted ? '[ UNMUTE ]' : '[ MUTE ]'}
+                </button>
+              </div>
             </div>
           )}
         </div>

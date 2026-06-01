@@ -35,3 +35,8 @@ Thumbs.db
 
 # 6. 本地專屬筆記 (Local Startup Note)
 start_note.md
+
+# 7. 一鍵啟動腳本與日誌 (Startup script and logs)
+start.sh
+backend.log
+frontend.log

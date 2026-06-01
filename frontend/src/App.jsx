@@ -91,29 +91,8 @@ function App() {
   const [sourceUrl, setSourceUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
-  // V5.4 極簡動態快捷推薦列狀態
-  const [shortcuts, setShortcuts] = useState(() => {
-    try {
-      const saved = localStorage.getItem('silent_archive_shortcuts');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error("無法加載本地快捷列數據:", e);
-    }
-    return [
-      { label: 'KIKO KOSTADINOV', value: 'kiko-kostadinov' },
-      { label: 'ACNE STUDIOS', value: 'acne-studios' },
-      { label: 'MAISON MARGIELA', value: 'maison-margiela' }
-    ];
-  });
-
-  // 同步寫入 localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('silent_archive_shortcuts', JSON.stringify(shortcuts));
-    } catch (e) {
-      console.error("無法寫入本地快捷列數據:", e);
-    }
-  }, [shortcuts]);
+  // V8.2 品牌快捷推薦列狀態 (雲端資料庫)
+  const [shortcuts, setShortcuts] = useState([]);
 
   // --- 右半屏 (The Vault) 策展持久化狀態 (V6.1 - Supabase 雲端資料庫) ---
   const [archivedLooks, setArchivedLooks] = useState([]);
@@ -121,7 +100,7 @@ function App() {
   // V7.0 Oracle Vision AI 正在解析中的 Look ID 集合
   const [analyzingIds, setAnalyzingIds] = useState(new Set());
 
-  // ⏳ 從 Supabase 雲端資料庫拉取收藏的 Looks
+  // ⏳ 從 Supabase 雲端資料庫拉取收藏的 Looks，並啟動實時訂閱
   useEffect(() => {
     const fetchArchived = async () => {
       try {
@@ -131,7 +110,6 @@ function App() {
           .order('created_at', { ascending: false });
         
         if (!error && data) {
-          // 確保每個 item 的 tags 是陣列且 note 是字串
           const parsed = data.map(item => ({
             ...item,
             tags: Array.isArray(item.tags) ? item.tags : [],
@@ -146,6 +124,82 @@ function App() {
       }
     };
     fetchArchived();
+
+    // ⚡ 訂閱 Supabase PostgreSQL 實時廣播變更 (Realtime)
+    const channel = supabase
+      .channel('realtime-looks')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'archived_looks' },
+        (payload) => {
+          console.log("⚡ [REALTIME] archived_looks 變更:", payload);
+          if (payload.eventType === 'INSERT') {
+            const newLook = {
+              ...payload.new,
+              tags: Array.isArray(payload.new.tags) ? payload.new.tags : [],
+              note: typeof payload.new.note === 'string' ? payload.new.note : ''
+            };
+            setArchivedLooks(prev => {
+              if (prev.some(x => x.id === newLook.id)) return prev;
+              return [newLook, ...prev];
+            });
+          } else if (payload.eventType === 'DELETE') {
+            setArchivedLooks(prev => prev.filter(x => x.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = {
+              ...payload.new,
+              tags: Array.isArray(payload.new.tags) ? payload.new.tags : [],
+              note: typeof payload.new.note === 'string' ? payload.new.note : ''
+            };
+            setArchivedLooks(prev => prev.map(x => x.id === updated.id ? updated : x));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // ⏳ 從 Supabase 載入品牌快捷列 (Shortcuts) 及初始化
+  useEffect(() => {
+    const fetchShortcuts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('shortcuts')
+          .select('*')
+          .order('created_at', { ascending: true });
+        
+        if (!error && data) {
+          let loaded = data;
+          if (data.length === 0) {
+            // 資料庫為空，寫入預設的三家品牌
+            const defaultShortcuts = [
+              { label: 'KIKO KOSTADINOV', value: 'kiko-kostadinov' },
+              { label: 'ACNE STUDIOS', value: 'acne-studios' },
+              { label: 'MAISON MARGIELA', value: 'maison-margiela' }
+            ];
+            const { data: inserted, error: insertErr } = await supabase
+              .from('shortcuts')
+              .insert(defaultShortcuts)
+              .select();
+            if (!insertErr && inserted) {
+              loaded = inserted;
+            }
+          }
+          setShortcuts(loaded);
+          if (loaded.length > 0) {
+            fetchRunwayLooks(loaded[0].value);
+          }
+        } else if (error) {
+          console.error("Supabase 載入快捷品牌錯誤:", error);
+        }
+      } catch (err) {
+        console.error("Supabase 載入快捷品牌異常:", err);
+      }
+    };
+    fetchShortcuts();
   }, []);
 
 
@@ -218,8 +272,8 @@ function App() {
     fetchRunwayLooks(currentDesigner, seasonName);
   };
 
-  // V5.4 新增快捷列品牌
-  const handleAddShortcut = (designerSlug) => {
+  // V8.2 新增快捷列品牌至雲端 (Supabase)
+  const handleAddShortcut = async (designerSlug) => {
     if (!designerSlug) return;
     const value = designerSlug.trim().toLowerCase();
     
@@ -232,14 +286,40 @@ function App() {
     if (isExist) return;
     
     const label = value.replace(/-/g, ' ').toUpperCase();
-    setShortcuts(prev => [...prev, { label, value }]);
-    showToast(`ADDED TO SHORTCUTS // ${label}`, "success");
+    const newShortcut = { label, value };
+
+    try {
+      const { data, error } = await supabase
+        .from('shortcuts')
+        .insert([newShortcut])
+        .select();
+      if (!error && data && data.length > 0) {
+        setShortcuts(prev => [...prev, data[0]]);
+        showToast(`ADDED TO SHORTCUTS // ${label}`, "success");
+      } else if (error) {
+        console.error("Supabase 新增快捷列失敗:", error);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // V5.4 刪除快捷列品牌
-  const handleDeleteShortcut = (value) => {
-    setShortcuts(prev => prev.filter(s => s.value !== value));
-    showToast("SHORTCUT REMOVED");
+  // V8.2 從雲端刪除快捷列品牌 (Supabase)
+  const handleDeleteShortcut = async (value) => {
+    try {
+      const { error } = await supabase
+        .from('shortcuts')
+        .delete()
+        .eq('value', value);
+      if (!error) {
+        setShortcuts(prev => prev.filter(s => s.value !== value));
+        showToast("SHORTCUT REMOVED");
+      } else {
+        console.error("Supabase 刪除快捷列失敗:", error);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // 品牌快捷列重新排序
@@ -506,11 +586,7 @@ function App() {
   // ==========================================
   // 初始化與生命週期
   // ==========================================
-  useEffect(() => {
-    // 預設動態載入快捷列第一個品牌（左到右順序），確保解鎖後首頁與選單第一位完全對齊
-    const initialDesigner = shortcuts.length > 0 ? shortcuts[0].value : 'maison-margiela';
-    fetchRunwayLooks(initialDesigner);
-  }, []);
+
 
   // 全局 Toast 提示調度
   const showToast = (message, type = 'info') => {

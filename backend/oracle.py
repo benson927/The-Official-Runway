@@ -67,11 +67,22 @@ def analyze_image_gemini(image_url, api_key):
     # 1. 抓取圖片二進位數據
     resp = requests.get(image_url, timeout=12)
     resp.raise_for_status()
-    image_bytes = resp.content
-    content_type = resp.headers.get("Content-Type", "image/jpeg")
+    
+    # ✦ 使用 Pillow 對原圖進行 WebP 等比例縮放與壓縮以優化 API 傳輸 (Avoid Token Waste & Latency)
+    from PIL import Image
+    import io
+    
+    img = Image.open(io.BytesIO(resp.content))
+    img.thumbnail((512, 512))
+    
+    out_io = io.BytesIO()
+    img.save(out_io, format="WEBP", quality=80)
+    webp_bytes = out_io.getvalue()
+    
+    content_type = "image/webp"
     
     # 2. Base64 編碼
-    b64_data = base64.b64encode(image_bytes).decode("utf-8")
+    b64_data = base64.b64encode(webp_bytes).decode("utf-8")
     
     # 3. 呼叫 Gemini 1.5 Flash 服務
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
