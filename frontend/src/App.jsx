@@ -552,6 +552,7 @@ function App() {
         onAddShortcut={handleAddShortcut}
         onDeleteShortcut={handleDeleteShortcut}
         onReorderShortcuts={handleReorderShortcuts}
+        showToast={showToast}
       />
 
       {/* 🔍 V5.8 全螢幕沉浸式細部放大鏡 Portal */}

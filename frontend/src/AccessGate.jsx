@@ -131,8 +131,9 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
     const value = e.target.value;
     setPasscodeInput(value);
 
-    // 取得環境變數密碼，若未定義則預設為 "BENSON"
-    const targetPasscode = import.meta.env.VITE_VAULT_PASSCODE || "BENSON";
+    // 優先取得本地自訂密碼，次之讀取環境變數，最後為預設 "BENSON"
+    const localPasscode = localStorage.getItem('vault_custom_passcode');
+    const targetPasscode = localPasscode || import.meta.env.VITE_VAULT_PASSCODE || "BENSON";
 
     // 密碼正確：觸發 GRANTED 解鎖
     if (value.toUpperCase() === targetPasscode.toUpperCase()) {
@@ -148,7 +149,8 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
   // 4. 處理按下 Enter 時密碼錯誤的比對反饋
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      const targetPasscode = import.meta.env.VITE_VAULT_PASSCODE || "BENSON";
+      const localPasscode = localStorage.getItem('vault_custom_passcode');
+      const targetPasscode = localPasscode || import.meta.env.VITE_VAULT_PASSCODE || "BENSON";
       if (passcodeInput.toUpperCase() !== targetPasscode.toUpperCase()) {
         setLockState('DENIED');
         setPasscodeInput('');

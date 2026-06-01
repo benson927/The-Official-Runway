@@ -55,7 +55,8 @@ const SplitViewLayout = ({
   onRemoveLook,
   onUpdateTags,
   onUpdateNote,
-  analyzingIds = new Set()
+  analyzingIds = new Set(),
+  showToast
 }) => {
   const [designerInput, setDesignerInput] = useState('');
   
@@ -64,6 +65,10 @@ const SplitViewLayout = ({
   
   // ✦ 季度時間軸容器 Ref
   const timelineRef = useRef(null);
+
+  // ✦ 自訂密碼修改器狀態
+  const [isChangingPasscode, setIsChangingPasscode] = useState(false);
+  const [newPasscodeInput, setNewPasscodeInput] = useState('');
 
   // 取得品牌對應的 Instagram 帳號 (若無映射則以格式化後的品牌名稱作為 Fallback 自癒)
   const getInstagramHandle = (designer) => {
@@ -390,10 +395,51 @@ const SplitViewLayout = ({
           </button>
         </div>
 
-        {/* Right Curated Statistics */}
-        <span className="font-sans text-[10px] font-black tracking-widest text-neutral-400 uppercase select-none">
-          {archivedLooks.length} ITEMS CURATED
-        </span>
+        {/* Right Curated Statistics & Custom Passcode */}
+        <div className="flex items-center gap-6 select-none">
+          {isChangingPasscode ? (
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={newPasscodeInput}
+                onChange={(e) => setNewPasscodeInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const clean = newPasscodeInput.trim();
+                    if (clean) {
+                      localStorage.setItem('vault_custom_passcode', clean);
+                      setIsChangingPasscode(false);
+                      setNewPasscodeInput('');
+                      if (showToast) {
+                        showToast("NEW VAULT PASSCODE SECURED", "success");
+                      }
+                    } else {
+                      setIsChangingPasscode(false);
+                    }
+                  } else if (e.key === 'Escape') {
+                    setIsChangingPasscode(false);
+                  }
+                }}
+                onBlur={() => setIsChangingPasscode(false)}
+                placeholder="NEW PASSCODE"
+                className="bg-transparent border-b border-neutral-900/20 text-[10px] font-sans font-black tracking-widest text-neutral-950 placeholder-neutral-300 focus:outline-none w-28 uppercase text-right"
+                autoFocus
+              />
+              <span className="font-mono text-[10px] text-neutral-900 ml-0.5 animate-blink">_</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsChangingPasscode(true)}
+              className="font-sans text-[10px] font-black tracking-widest text-neutral-400 hover:text-neutral-950 transition-colors uppercase border-none bg-transparent cursor-pointer"
+            >
+              [ SET KEY ]
+            </button>
+          )}
+
+          <span className="font-sans text-[10px] font-black tracking-widest text-neutral-400 uppercase select-none">
+            {archivedLooks.length} ITEMS CURATED
+          </span>
+        </div>
       </header>
 
       {/* ================================================== */}
