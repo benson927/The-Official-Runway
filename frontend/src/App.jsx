@@ -91,8 +91,29 @@ function App() {
   const [sourceUrl, setSourceUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
-  // V8.2 品牌快捷推薦列狀態 (雲端資料庫)
-  const [shortcuts, setShortcuts] = useState([]);
+  // ✦ 雙軌快取自癒機制：優先從本地快取載入，隨後非同步從雲端拉取覆蓋同步
+  const [shortcuts, setShortcuts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('silent_archive_shortcuts');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error("無法加載本地快捷列數據:", e);
+    }
+    return [
+      { label: 'KIKO KOSTADINOV', value: 'kiko-kostadinov' },
+      { label: 'ACNE STUDIOS', value: 'acne-studios' },
+      { label: 'MAISON MARGIELA', value: 'maison-margiela' }
+    ];
+  });
+
+  // shortcuts 變更時同步寫入 localStorage 作為備份，保障離線/無表降級正常
+  useEffect(() => {
+    try {
+      localStorage.setItem('silent_archive_shortcuts', JSON.stringify(shortcuts));
+    } catch (e) {
+      console.error("無法寫入本地快捷列備份:", e);
+    }
+  }, [shortcuts]);
 
   // --- 右半屏 (The Vault) 策展持久化狀態 (V6.1 - Supabase 雲端資料庫) ---
   const [archivedLooks, setArchivedLooks] = useState([]);
@@ -162,7 +183,7 @@ function App() {
     };
   }, []);
 
-  // ⏳ 從 Supabase 載入品牌快捷列 (Shortcuts) 及初始化
+  // ⏳ 從 Supabase 載入品牌快捷列 (Shortcuts) 並與本地同步，出錯時安全降級
   useEffect(() => {
     const fetchShortcuts = async () => {
       try {
@@ -174,7 +195,6 @@ function App() {
         if (!error && data) {
           let loaded = data;
           if (data.length === 0) {
-            // 資料庫為空，寫入預設的三家品牌
             const defaultShortcuts = [
               { label: 'KIKO KOSTADINOV', value: 'kiko-kostadinov' },
               { label: 'ACNE STUDIOS', value: 'acne-studios' },
@@ -189,17 +209,20 @@ function App() {
             }
           }
           setShortcuts(loaded);
-          if (loaded.length > 0) {
-            fetchRunwayLooks(loaded[0].value);
-          }
         } else if (error) {
-          console.error("Supabase 載入快捷品牌錯誤:", error);
+          console.warn("⚠️ [SHORTCUTS] 雲端品牌快捷表不存在，已降級使用本地緩存:", error.message);
         }
       } catch (err) {
-        console.error("Supabase 載入快捷品牌異常:", err);
+        console.warn("⚠️ [SHORTCUTS] 雲端品牌載入異常，降級使用本地緩存:", err);
       }
     };
     fetchShortcuts();
+  }, []);
+
+  // ✦ 初始化載入第一個快捷推薦品牌（優先使用快取/預設第一項）
+  useEffect(() => {
+    const initialDesigner = shortcuts.length > 0 ? shortcuts[0].value : 'maison-margiela';
+    fetchRunwayLooks(initialDesigner);
   }, []);
 
 
@@ -272,7 +295,7 @@ function App() {
     fetchRunwayLooks(currentDesigner, seasonName);
   };
 
-  // V8.2 新增快捷列品牌至雲端 (Supabase)
+  // ✦ V8.2 新增快捷列品牌（雙軌自癒：即時渲染更新，非同步同步雲端）
   const handleAddShortcut = async (designerSlug) => {
     if (!designerSlug) return;
     const value = designerSlug.trim().toLowerCase();
@@ -288,34 +311,37 @@ function App() {
     const label = value.replace(/-/g, ' ').toUpperCase();
     const newShortcut = { label, value };
 
+    // 1. 即時更新本地 state，保障在無表/斷網時依然能正常使用
+    setShortcuts(prev => [...prev, newShortcut]);
+    showToast(`ADDED TO SHORTCUTS // ${label}`, "success");
+
+    // 2. 非同步同步到 Supabase
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('shortcuts')
-        .insert([newShortcut])
-        .select();
-      if (!error && data && data.length > 0) {
-        setShortcuts(prev => [...prev, data[0]]);
-        showToast(`ADDED TO SHORTCUTS // ${label}`, "success");
-      } else if (error) {
-        console.error("Supabase 新增快捷列失敗:", error);
+        .insert([newShortcut]);
+      if (error) {
+        console.warn("⚠️ [SHORTCUTS] 雲端寫入失敗 (可能 shortcuts 表未建):", error.message);
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  // V8.2 從雲端刪除快捷列品牌 (Supabase)
+  // ✦ V8.2 刪除快捷列品牌（雙軌自癒）
   const handleDeleteShortcut = async (value) => {
+    // 1. 即時更新本地 state
+    setShortcuts(prev => prev.filter(s => s.value !== value));
+    showToast("SHORTCUT REMOVED");
+
+    // 2. 非同步從雲端刪除
     try {
       const { error } = await supabase
         .from('shortcuts')
         .delete()
         .eq('value', value);
-      if (!error) {
-        setShortcuts(prev => prev.filter(s => s.value !== value));
-        showToast("SHORTCUT REMOVED");
-      } else {
-        console.error("Supabase 刪除快捷列失敗:", error);
+      if (error) {
+        console.warn("⚠️ [SHORTCUTS] 雲端刪除失敗:", error.message);
       }
     } catch (err) {
       console.error(err);
