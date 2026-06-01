@@ -88,7 +88,7 @@ const VaultCard = ({
     <div className="break-inside-avoid relative group rounded-none overflow-hidden border-none bg-transparent transition-all duration-500 transform hover:scale-[1.01]">
       
       {/* 🟢 圖片展示與取消收藏遮罩區 (直角設計) */}
-      <div className={`relative overflow-hidden aspect-auto bg-neutral-200 rounded-none ${
+      <div className={`relative overflow-hidden aspect-auto bg-neutral-200 dark:bg-neutral-800 rounded-none ${
         !imageLoaded ? 'animate-pulse' : ''
       }`}>
         <img 
@@ -105,7 +105,7 @@ const VaultCard = ({
         <div className="absolute inset-0 bg-neutral-950/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[2px]">
           <button
             onClick={() => onRemove(look)}
-            className="px-5 py-2.5 bg-white text-neutral-950 font-sans text-xs font-black tracking-[0.25em] uppercase rounded-full shadow-2xl hover:bg-neutral-950 hover:text-white hover:scale-105 active:scale-95 transition-all duration-300 transform translate-y-3 group-hover:translate-y-0"
+            className="px-5 py-2.5 bg-white dark:bg-[#121212] text-neutral-950 dark:text-[#F5F5F5] font-sans text-xs font-black tracking-[0.25em] uppercase rounded-full shadow-2xl hover:bg-neutral-950 dark:hover:bg-white hover:text-white dark:hover:text-black hover:scale-105 active:scale-95 transition-all duration-300 transform translate-y-3 group-hover:translate-y-0"
           >
             - REMOVE
           </button>
@@ -116,16 +116,16 @@ const VaultCard = ({
       <div className="pt-4 pb-2 px-1 flex flex-col gap-3 bg-transparent">
         
         {/* Look 基本時裝屋元數據 */}
-        <div className="flex flex-col gap-0.5 border-b border-neutral-900/10 pb-3">
+        <div className="flex flex-col gap-0.5 border-b border-neutral-900/10 dark:border-neutral-100/10 pb-3">
           <div className="flex items-center justify-between">
-            <span className="font-serif text-xs font-black text-neutral-900 uppercase tracking-widest truncate max-w-[130px]">
+            <span className="font-serif text-xs font-black text-neutral-900 dark:text-[#F5F5F5] uppercase tracking-widest truncate max-w-[130px]">
               {designer.replace(/-/g, ' ')}
             </span>
-            <span className="font-sans text-xs font-black text-neutral-400 tracking-wider">
+            <span className="font-sans text-xs font-black text-neutral-400 dark:text-neutral-500 tracking-wider">
               LOOK {look_number}
             </span>
           </div>
-          <p className="font-sans text-xs font-bold text-neutral-400 tracking-widest uppercase truncate">
+          <p className="font-sans text-xs font-bold text-neutral-400 dark:text-neutral-500 tracking-widest uppercase truncate">
             {season}
           </p>
         </div>
@@ -133,7 +133,7 @@ const VaultCard = ({
         {/* 🏷️ 自訂 Hashtags 展示區 / ORACLE ANALYZING 狀態 */}
         {isAnalyzing ? (
           <div className="flex items-center gap-1 py-1">
-            <span className="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-400 select-none flex items-center">
+            <span className="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 select-none flex items-center">
               [ ORACLE ANALYZING<span className="animate-blink">_</span> ]
             </span>
           </div>
@@ -148,13 +148,13 @@ const VaultCard = ({
                       onTagClick && onTagClick(tag);
                     }
                   }}
-                  className="font-sans text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-neutral-950 transition-colors flex items-center group/tag select-none cursor-pointer"
+                  className="font-sans text-xs font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors flex items-center group/tag select-none cursor-pointer"
                 >
                   #{tag}
                   {/* 標籤上的微型刪除按鈕 — Hover 時浮現 */}
                   <button
                     onClick={() => handleRemoveTag(tag)}
-                    className="ml-1 text-neutral-300 hover:text-red-500 font-sans text-xs font-medium opacity-0 group-hover/tag:opacity-100 transition-opacity pl-0.5 cursor-pointer"
+                    className="ml-1 text-neutral-300 dark:text-neutral-700 hover:text-red-500 font-sans text-xs font-medium opacity-0 group-hover/tag:opacity-100 transition-opacity pl-0.5 cursor-pointer"
                     title={`REMOVE #${tag}`}
                   >
                     ×
@@ -176,17 +176,17 @@ const VaultCard = ({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="+ ADD TAG..."
-              className={`w-full bg-transparent py-1 text-xs font-black tracking-widest uppercase focus:outline-none transition-all duration-500 border-b border-transparent placeholder-transparent group-hover:placeholder-neutral-300 ${
+              className={`w-full bg-transparent py-1 text-xs font-black tracking-widest uppercase focus:outline-none transition-all duration-500 border-b border-transparent placeholder-transparent group-hover:placeholder-neutral-300 dark:group-hover:placeholder-neutral-700 ${
                 isFocused 
-                  ? 'border-neutral-950 placeholder-neutral-300 text-neutral-950' 
-                  : 'group-hover:border-neutral-200 text-neutral-400'
+                  ? 'border-neutral-950 dark:border-[#F5F5F5] placeholder-neutral-300 dark:placeholder-neutral-700 text-neutral-955 dark:text-[#F5F5F5]' 
+                  : 'group-hover:border-neutral-200 dark:group-hover:border-neutral-800 text-neutral-400 dark:text-neutral-500'
               } border-dashed`}
             />
           </div>
         )}
 
         {/* 📝 V5.8 私人微筆記 (Micro-Notes) */}
-        <div className="mt-3 pt-3 border-t border-neutral-900/10 relative group/note">
+        <div className="mt-3 pt-3 border-t border-neutral-900/10 dark:border-neutral-100/10 relative group/note">
           <input
             type="text"
             value={localNote}
@@ -194,7 +194,7 @@ const VaultCard = ({
             onBlur={handleNoteBlur}
             onKeyDown={handleNoteKeyDown}
             placeholder="ADD NOTE..."
-            className="w-full bg-transparent text-xs font-sans italic text-slate-400 focus:text-neutral-800 placeholder-slate-300 group-hover:placeholder-slate-400 focus:outline-none border-none py-0.5"
+            className="w-full bg-transparent text-xs font-sans italic text-slate-400 dark:text-slate-500 focus:text-neutral-800 dark:focus:text-[#F5F5F5] placeholder-slate-300 dark:placeholder-slate-700 group-hover:placeholder-slate-400 dark:group-hover:placeholder-slate-600 focus:outline-none border-none py-0.5"
           />
         </div>
 

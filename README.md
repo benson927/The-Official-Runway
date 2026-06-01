@@ -25,24 +25,29 @@
 
 ---
 
-## ⚡ V8.1 最新優化與自訂密碼 (Core Updates)
+## ⚡ V8.7 最新優化與核心版本 (Core Updates)
 
-在 V8.0 中，我們針對**高奢視覺張力**與**渲染效能防禦**進行了重磅升級：
+在本版本中，我們針對**時裝策展流程**與**全站視覺美學**進行了重磅升級：
 
-### 1. ⛩ 金庫雙開大門拉幕解鎖 (The Shutter Portal)
-* 門禁解鎖面板背景拆分為左右兩扇消光灰（`#F5F5F5`）閘門。
-* 輸入正確密碼時，密碼框淡出，左右大門以 `power4.inOut` 緩動平滑拉開，營造開啟實體時裝金庫的沉浸感與儀式感。
+### 1. 🖤 消光暗黑模式 (Noir Mode / Dark Mode)
+* 頂部導覽列提供一鍵主題切換按鈕 `[ NOIR_ ]` / `[ LIGHT_ ]`。
+* 於 `body` 與各大容器添加全局 `transition-colors duration-500`。點擊時，全站背景於淺灰與消光深黑 `#0A0A0A` 之間平滑過渡，文字與邊框細部完美適配，消除瞬間閃爍。
+* 使用 `localStorage` 對偏好設定進行持久化記憶，在重新整理或再次進入時自動復原。
 
-### 2. 🎞 Toast 彈性動效與 Brutalist 去圓角 (The Editorial Toast)
-* 去除原本的 `rounded-2xl`，改為俐落的 **Brutalist 銳利直角 (`rounded-none`)**。
-* 採用 GSAP 的 `back.out(1.5)` 緩動曲線，使 Toast 提示從螢幕下方滑入時帶有優雅的物理阻尼彈性。
+### 📄 2. 提案編輯畫冊導出 (Editorial Export)
+* 私人金庫頂部配置極簡 `[ EXPORT BOOK ]` 文字按鈕。
+* 點擊時動態寫入包含 Google Fonts (Playfair Display & Inter) 的 Brutalist 雙欄排版 HTML 頁面，並自動喚起瀏覽器原生列印視窗，支援一鍵導出為高解析度時裝提案 PDF。
 
-### 3. ⏱ 季度時間軸平滑定位 (Timeline ScrollTo)
-* 季度時間軸新增選中狀態偵測，當切換品牌或季度時，GSAP 自動平滑地將所選刻度滾動至時間軸正中央，提供極佳的段落物理回饋。
+### 🔀 3. 自由情緒板拖拽排序 (Drag-to-Layout)
+* 情緒板卡片支援 HTML5 原生 Drag-and-Drop 拖放重排。
+* 導入自適應排序演算法，即使在特定 `#TAG` 篩選視角下拖拽，其他卡片位置也會自適應保留。排序結果即時備份至 `localStorage` 以防資料庫異步變更風險，並實作載入排序自癒機制。
 
-### 4. 🌀 流體網格物理推擠防禦 (Layout Thrashing Prevention)
-* **效能重構**：預先計算並快取時裝卡片相對於 `document` 的中心點座標，完全避免在 `pointermove` 中高頻呼叫 `getBoundingClientRect()`。
-* 在滑鼠滑過數十張大圖時，消除 Reflow 性能瓶頸，高畫質大螢幕下幀率穩鎖 **60/120fps**。
+### 4. ⛩ 門禁雙開拉幕與 Toast 彈性 (The Shutter Portal & Toast)
+* **拉幕動畫**：解鎖時中央密碼框淡出，左右閘門以 `power4.inOut` 平滑拉開。
+* **Brutalist Toast**：移除圓角採用銳利直角 (`rounded-none`)，並以 `back.out(1.5)` 帶有彈性的 GSAP 曲線滑入。
+
+### 5. 🌀 物理推擠效能防禦 (Layout Thrashing Prevention)
+* 預先計算並快取圖片中心點，彻底消除 `pointermove` 中高頻呼叫 `getBoundingClientRect()` 導致的 Layout Reflow 性能瓶頸，幀率穩鎖 **60/120fps**。
 
 ---
 
@@ -92,3 +97,13 @@ cd frontend && npm run dev
 
 ---
 * 走查報告與詳細修改細節：[walkthrough.md](./walkthrough.md)
+
+---
+
+## ⚖️ 著作權與合理使用聲明 (Copyright & Fair Use Disclaimer)
+
+本系統為私人時裝策展工作站，在展示與獲取時裝秀場圖片時，遵循以下著作權協議：
+
+* **非商業個人研究**：本系統僅供個人學術研究、時裝廓形分析、內部提案草案（Moodboard）之目的使用，不含任何商業營利行為。符合著作權法中關於「合理使用 (Fair Use)」的規範。
+* **版權歸屬**：所有秀場圖片與時裝 Looks 之著作權與版權均歸屬於 **GoRunway**、**Vogue Runway**、原攝影師以及各大時裝屋（Fashion Houses）所有。
+* **導出標記**：當點擊 `[ EXPORT BOOK ]` 導出提案畫冊時，系統會自動在頁面註腳標記為 `FOR PERSONAL/INTERNAL EDITORIAL PRESENTATION ONLY`，以維護原作者版權與學術引用規範。

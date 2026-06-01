@@ -12,6 +12,12 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+html.dark body {
+  background-color: #0A0A0A; /* Noir 消光黑背景 */
+  color: #F5F5F5;            /* Noir 粉白文字 */
 }
 
 /* 襯線體 - Playfair Display 用於 Header 標題與時裝元數據 */
@@ -31,13 +37,26 @@ body {
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: #F5F5F5;
+  transition: background-color 0.5s ease;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #E0E0E0;
   border-radius: 2px;
+  transition: background-color 0.5s ease;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #1A1A1A;
+}
+
+/* 暗黑模式滾動條適配 */
+html.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #262626;
+}
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #F5F5F5;
 }
 
 /* 大面積冷淡風留白容器與網格 */

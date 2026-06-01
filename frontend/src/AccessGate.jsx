@@ -172,11 +172,11 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center select-none bg-transparent overflow-hidden"
     >
       <div 
-        className="gate-left absolute left-0 top-0 w-1/2 h-full bg-[#F5F5F5] border-r border-neutral-200/20 z-0"
+        className="gate-left absolute left-0 top-0 w-1/2 h-full bg-[#F5F5F5] dark:bg-[#0A0A0A] border-r border-neutral-200/20 dark:border-neutral-800/40 z-0 transition-colors duration-500"
         style={{ willChange: 'transform' }}
       />
       <div 
-        className="gate-right absolute right-0 top-0 w-1/2 h-full bg-[#F5F5F5] z-0"
+        className="gate-right absolute right-0 top-0 w-1/2 h-full bg-[#F5F5F5] dark:bg-[#0A0A0A] z-0 transition-colors duration-500"
         style={{ willChange: 'transform' }}
       />
       
@@ -234,9 +234,9 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
 
       {!isMontageActive && (
         <div className="gate-center-ui flex flex-col items-center text-center gap-6 animate-fade-in select-none z-10 relative">
-          <span className="text-neutral-300 text-3xl font-serif mb-2 select-none">✦</span>
+          <span className="text-neutral-300 dark:text-neutral-700 text-3xl font-serif mb-2 select-none">✦</span>
           
-          <div className="relative w-72 flex flex-col items-center border-b border-dashed border-neutral-300 focus-within:border-neutral-900 transition-colors duration-500 pb-2">
+          <div className="relative w-72 flex flex-col items-center border-b border-dashed border-neutral-300 dark:border-neutral-800 focus-within:border-neutral-900 dark:focus-within:border-[#F5F5F5] transition-colors duration-500 pb-2">
             <input
               ref={inputRef}
               type="password"
@@ -245,7 +245,7 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
               onKeyDown={handleKeyDown}
               disabled={lockState === 'GRANTED' || lockState === 'DENIED'}
               placeholder="••••"
-              className="w-full text-center font-sans font-black text-2xl tracking-[0.4em] uppercase border-none outline-none bg-transparent text-neutral-800 placeholder-neutral-200 transition-all duration-300"
+              className="w-full text-center font-sans font-black text-2xl tracking-[0.4em] uppercase border-none outline-none bg-transparent text-neutral-800 dark:text-[#F5F5F5] placeholder-neutral-200 dark:placeholder-neutral-800 transition-all duration-300"
               style={{
                 letterSpacing: passcodeInput ? '0.45em' : '0.2em'
               }}
@@ -254,7 +254,7 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
 
           <div className="h-6 flex items-center justify-center">
             {lockState === 'LOCKED' && (
-              <span className="font-sans text-xs font-black text-neutral-400 tracking-[0.3em] uppercase animate-pulse">
+              <span className="font-sans text-xs font-black text-neutral-400 dark:text-neutral-500 tracking-[0.3em] uppercase animate-pulse">
                 VAULT // LOCKED
               </span>
             )}

@@ -104,12 +104,12 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-md p-6 select-none animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-md p-6 select-none animate-fade-in transition-colors duration-500">
       
-      {/* 🔴 左上角極簡關閉按鈕 */}
+      {/* 🔴 Left-Top 極簡關閉按鈕 */}
       <button
         onClick={onClose}
-        className="absolute top-8 left-8 font-sans text-xs font-black text-neutral-400 hover:text-neutral-950 tracking-[0.3em] uppercase transition-colors duration-300 cursor-pointer select-none"
+        className="absolute top-8 left-8 font-sans text-xs font-black text-neutral-400 dark:text-neutral-600 hover:text-neutral-950 dark:hover:text-[#F5F5F5] tracking-[0.3em] uppercase transition-colors duration-300 cursor-pointer select-none"
       >
         [ CLOSE × ]
       </button>
@@ -122,7 +122,7 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
           onClick={() => setIsZoomed(!isZoomed)}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setIsZoomed(false)}
-          className="flex-1 w-full h-full flex items-center justify-center overflow-hidden rounded-[2.5rem] bg-neutral-50/50 border border-neutral-100 relative cursor-pointer"
+          className="flex-1 w-full h-full flex items-center justify-center overflow-hidden rounded-[2.5rem] bg-neutral-50/50 dark:bg-neutral-900/10 border border-neutral-100 dark:border-neutral-800 relative cursor-pointer transition-colors duration-500"
         >
           <img
             src={image_url}
@@ -138,8 +138,8 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
 
           {/* 浮動提示：引導使用者點擊大圖放大 */}
           {!isZoomed && (
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-full border border-neutral-100 shadow-sm pointer-events-none transition-opacity duration-300">
-              <span className="font-sans text-xs font-black text-neutral-500 tracking-[0.25em] uppercase">
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md rounded-full border border-neutral-100 dark:border-neutral-800 shadow-sm pointer-events-none transition-opacity duration-300 transition-colors duration-500">
+              <span className="font-sans text-xs font-black text-neutral-500 dark:text-neutral-400 tracking-[0.25em] uppercase">
                 CLICK TO ZOOM FABRIC DETAIL
               </span>
             </div>
@@ -149,7 +149,7 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
           {videoUrl && isPlayOpen && embedUrl && (
             <div 
               onClick={(e) => e.stopPropagation()} 
-              className="absolute bottom-6 right-6 w-80 aspect-video rounded-3xl overflow-hidden border border-neutral-200/20 shadow-2xl bg-black z-20 transition-all duration-500 transform scale-100 hover:scale-[1.02]"
+              className="absolute bottom-6 right-6 w-80 aspect-video rounded-3xl overflow-hidden border border-neutral-200/20 dark:border-neutral-800/40 shadow-2xl bg-black z-20 transition-all duration-500 transform scale-100 hover:scale-[1.02]"
             >
               <iframe
                 ref={iframeRef}
@@ -194,35 +194,35 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
         </div>
 
         {/* ⚪ 右側：極簡高奢大留白面板 */}
-        <div className="w-full md:w-80 flex flex-col justify-between py-10 pl-0 md:pl-12 border-t md:border-t-0 md:border-l border-neutral-100 h-full max-h-[75vh] select-none">
+        <div className="w-full md:w-80 flex flex-col justify-between py-10 pl-0 md:pl-12 border-t md:border-t-0 md:border-l border-neutral-100 dark:border-neutral-800 h-full max-h-[75vh] select-none transition-colors duration-500">
           
           {/* 品牌、季度與 Look Specimen 編號 */}
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
-              <span className="font-sans text-xs font-black text-neutral-400 tracking-[0.3em] uppercase">
+              <span className="font-sans text-xs font-black text-neutral-400 dark:text-neutral-600 tracking-[0.3em] uppercase">
                 DESIGNER SPECIMEN
               </span>
-              <h2 className="font-serif text-3xl font-black text-neutral-900 tracking-wider capitalize leading-tight">
+              <h2 className="font-serif text-3xl font-black text-neutral-900 dark:text-[#F5F5F5] tracking-wider capitalize leading-tight">
                 {designer.replace(/-/g, ' ')}
               </h2>
             </div>
 
-            <div className="w-12 h-[1px] bg-neutral-900 my-1"></div>
+            <div className="w-12 h-[1px] bg-neutral-900 dark:bg-[#F5F5F5] my-1"></div>
 
             <div className="flex flex-col gap-1">
-              <span className="font-sans text-xs font-black text-neutral-400 tracking-[0.2em] uppercase">
+              <span className="font-sans text-xs font-black text-neutral-400 dark:text-neutral-500 tracking-[0.2em] uppercase">
                 COLLECTION SEASON
               </span>
-              <p className="font-sans text-sm font-bold text-neutral-800 tracking-[0.1em] uppercase">
+              <p className="font-sans text-sm font-bold text-neutral-800 dark:text-neutral-300 tracking-[0.1em] uppercase">
                 {season}
               </p>
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="font-sans text-xs font-black text-neutral-400 tracking-[0.2em] uppercase">
+              <span className="font-sans text-xs font-black text-neutral-400 dark:text-neutral-500 tracking-[0.2em] uppercase">
                 ARCHIVE NUMBER
               </span>
-              <p className="font-serif text-sm italic text-neutral-500">
+              <p className="font-serif text-sm italic text-neutral-500 dark:text-neutral-400">
                 Lookbook Specimen No. {String(look_number).padStart(2, '0')}
               </p>
             </div>
@@ -231,15 +231,15 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
           {/* 🎬 秀場動態錄像切換鈕 (V6.6) */}
           {videoUrl && embedUrl && (
             <div className="flex flex-col gap-1 my-3">
-              <span className="font-sans text-[10px] font-black text-neutral-400 tracking-[0.2em] uppercase">
+              <span className="font-sans text-[10px] font-black text-neutral-400 dark:text-neutral-500 tracking-[0.2em] uppercase">
                 RUNWAY MOVEMENT
               </span>
               <button
                 onClick={() => setIsPlayOpen(!isPlayOpen)}
                 className={`w-full py-3.5 mt-1 text-center font-sans text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 rounded-full border ${
                   isPlayOpen 
-                    ? 'bg-neutral-950 text-white border-neutral-950 hover:bg-neutral-800' 
-                    : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-950 hover:text-white hover:border-neutral-950'
+                    ? 'bg-neutral-950 dark:bg-[#F5F5F5] text-white dark:text-neutral-950 border-neutral-950 dark:border-[#F5F5F5] hover:bg-neutral-800 dark:hover:bg-[#E0E0E0]' 
+                    : 'bg-white dark:bg-[#121212] text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-800 hover:bg-neutral-950 dark:hover:bg-[#F5F5F5] hover:text-white dark:hover:text-neutral-950 hover:border-neutral-950 dark:hover:border-[#F5F5F5]'
                 } active:scale-95 cursor-pointer flex items-center justify-center gap-2`}
               >
                 <span>{isPlayOpen ? '[ CLOSE CINEMA ]' : '▶ [ OPEN CINEMA ]'}</span>
@@ -249,7 +249,7 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
 
           {/* [+ ARCHIVE] 策展按鈕與已收藏狀態 */}
           <div className="flex flex-col gap-3">
-            <p className="font-sans text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase leading-relaxed text-center md:text-left">
+            <p className="font-sans text-xs font-bold text-neutral-400 dark:text-neutral-500 tracking-[0.2em] uppercase leading-relaxed text-center md:text-left">
               {isAlreadyCurated 
                 ? 'THIS PIECE HAS BEEN LOCKERED IN THE CURATOR\'S PRIVATE VAULT.'
                 : 'CLICK BELOW TO SECURE AND CURATE THIS LOOK INTO YOUR PERSONAL MOODBOARD.'
@@ -260,8 +260,8 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
               disabled={isAlreadyCurated}
               className={`w-full py-4 text-center font-sans text-xs font-black tracking-[0.3em] uppercase transition-all duration-300 rounded-full border ${
                 isAlreadyCurated
-                  ? 'bg-neutral-50 text-neutral-400 border-neutral-100 cursor-default'
-                  : 'bg-neutral-950 text-white border-neutral-950 hover:bg-white hover:text-neutral-950 hover:scale-105 active:scale-95 cursor-pointer'
+                  ? 'bg-neutral-50 dark:bg-[#1C1C1C] text-neutral-400 dark:text-neutral-600 border-neutral-100 dark:border-neutral-800 cursor-default'
+                  : 'bg-neutral-950 dark:bg-[#F5F5F5] text-white dark:text-neutral-955 border-neutral-950 dark:border-[#F5F5F5] hover:bg-white dark:hover:bg-transparent hover:text-neutral-950 dark:hover:text-[#F5F5F5] hover:scale-105 active:scale-95 cursor-pointer'
               }`}
             >
               {isAlreadyCurated ? '[ CURATED ]' : '[+ ARCHIVE]'}

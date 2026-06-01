@@ -27,7 +27,7 @@ const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCu
           e.stopPropagation();
           onZoom(look);
         }}
-        className={`relative aspect-[2/3] overflow-hidden rounded-none bg-neutral-200 cursor-zoom-in ${
+        className={`relative aspect-[2/3] overflow-hidden rounded-none bg-neutral-200 dark:bg-neutral-800 cursor-zoom-in ${
           !imageLoaded ? 'animate-pulse' : ''
         }`}
       >
@@ -48,8 +48,8 @@ const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCu
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-60"></div>
         
         {/* 微型標籤 - 左上角 Look 序號 (直角俐落設計) */}
-        <div className="absolute top-6 left-6 px-3 py-1 bg-white/80 backdrop-blur-md rounded-none border border-neutral-900/10 shadow-sm">
-          <span className="font-serif text-xs font-black text-neutral-900 tracking-wider">
+        <div className="absolute top-6 left-6 px-3 py-1 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md rounded-none border border-neutral-900/10 dark:border-neutral-100/10 shadow-sm">
+          <span className="font-serif text-xs font-black text-neutral-900 dark:text-[#F5F5F5] tracking-wider">
             N° {String(look_number).padStart(2, '0')}
           </span>
         </div>
@@ -61,7 +61,7 @@ const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCu
               e.stopPropagation(); // 阻止冒泡，防止點擊時選中卡片
               if (onRemove) onRemove(look);
             }}
-            className="absolute bottom-6 right-6 px-4 py-2 bg-white text-neutral-950 font-sans text-xs font-black tracking-[0.25em] uppercase rounded-full border border-neutral-200 shadow-xl backdrop-blur-sm opacity-100 transition-all duration-300 hover:bg-neutral-950 hover:text-white hover:scale-105 active:scale-95 z-10"
+            className="absolute bottom-6 right-6 px-4 py-2 bg-white dark:bg-[#121212] text-neutral-955 dark:text-[#F5F5F5] font-sans text-xs font-black tracking-[0.25em] uppercase rounded-full border border-neutral-200 dark:border-neutral-800 shadow-xl backdrop-blur-sm opacity-100 transition-all duration-300 hover:bg-neutral-950 dark:hover:bg-white hover:text-white dark:hover:text-black hover:scale-105 active:scale-95 z-10"
           >
             ✓ CURATED
           </button>
@@ -72,7 +72,7 @@ const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCu
                 e.stopPropagation(); // 阻止冒泡，防止點擊收藏時同時選中卡片
                 onCurate(look);
               }}
-              className="absolute bottom-6 right-6 px-4 py-2 bg-neutral-950/90 text-white font-sans text-xs font-black tracking-[0.25em] uppercase rounded-full border border-neutral-800 shadow-xl backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out transform translate-y-2 group-hover:translate-y-0 hover:bg-black hover:scale-105 active:scale-95 z-10"
+              className="absolute bottom-6 right-6 px-4 py-2 bg-neutral-950/90 dark:bg-[#F5F5F5]/90 text-white dark:text-neutral-955 font-sans text-xs font-black tracking-[0.25em] uppercase rounded-full border border-neutral-800 dark:border-neutral-200 shadow-xl backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out transform translate-y-2 group-hover:translate-y-0 hover:bg-black dark:hover:bg-white hover:scale-105 active:scale-95 z-10"
             >
               + CURATE
             </button>
@@ -83,17 +83,17 @@ const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCu
       {/* ⚪ 卡片底部時裝資訊區 (無容器包裝、直接浮水印出血排版) */}
       <div className="pt-4 pb-2 px-1 flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <span className="font-serif text-sm font-black uppercase text-neutral-900 tracking-[0.2em]">
+          <span className="font-serif text-sm font-black uppercase text-neutral-900 dark:text-[#F5F5F5] tracking-[0.2em]">
             LOOK {look_number}
           </span>
           {isActive && (
-            <span className="font-sans text-[10px] font-black text-neutral-900 tracking-widest uppercase border border-neutral-900 px-2 py-0.5 rounded-none">
+            <span className="font-sans text-[10px] font-black text-neutral-900 dark:text-[#F5F5F5] tracking-widest uppercase border border-neutral-900 dark:border-[#F5F5F5] px-2 py-0.5 rounded-none">
               ACTIVE
             </span>
           )}
         </div>
-        <div className="w-6 h-[1px] bg-neutral-900 transition-all duration-300 group-hover:w-12"></div>
-        <p className="font-sans text-[11px] font-bold text-neutral-400 tracking-widest uppercase truncate">
+        <div className="w-6 h-[1px] bg-neutral-900 dark:bg-[#F5F5F5] transition-all duration-300 group-hover:w-12"></div>
+        <p className="font-sans text-[11px] font-bold text-neutral-400 dark:text-neutral-500 tracking-widest uppercase truncate">
           {season}
         </p>
       </div>

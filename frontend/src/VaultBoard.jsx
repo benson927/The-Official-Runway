@@ -161,6 +161,21 @@ const VaultBoard = ({
             margin: 6px 0 0 0;
             line-height: 1.4;
           }
+          footer {
+            margin-top: 60px;
+            border-top: 1px solid #000000;
+            padding-top: 15px;
+            text-align: center;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          footer .disclaimer {
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            color: #888;
+            text-transform: uppercase;
+          }
           @media print {
             body {
               padding: 20px;
@@ -179,6 +194,9 @@ const VaultBoard = ({
         <div class="gallery">
           ${looksHtml}
         </div>
+        <footer>
+          <div class="disclaimer">FOR PERSONAL / INTERNAL EDITORIAL PRESENTATION ONLY // IMAGES COPYRIGHT BY GORUNWAY & VOGUE RUNWAY</div>
+        </footer>
         <script>
           window.onload = function() {
             setTimeout(function() {
@@ -267,22 +285,22 @@ const VaultBoard = ({
     : archivedLooks.filter(look => look.tags && look.tags.includes(activeFilterTag));
 
   return (
-    <div className="w-full h-full flex flex-col bg-white">
+    <div className="w-full h-full flex flex-col bg-white dark:bg-[#121212] transition-colors duration-500">
       {archivedLooks.length === 0 ? (
         // ⚪ Empty State: 寧靜大留白策展引導
-        <div className="flex-1 flex flex-col items-center justify-center p-12 bg-neutral-50/30 select-none">
+        <div className="flex-1 flex flex-col items-center justify-center p-12 bg-neutral-50/30 dark:bg-neutral-900/10 select-none">
           <div className="text-center flex flex-col items-center gap-6 max-w-sm">
-            <span className="text-neutral-300 text-3xl font-serif">✦</span>
-            <span className="font-serif text-[11px] tracking-[0.4em] font-black uppercase text-neutral-400 animate-pulse">
+            <span className="text-neutral-300 dark:text-neutral-700 text-3xl font-serif">✦</span>
+            <span className="font-serif text-[11px] tracking-[0.4em] font-black uppercase text-neutral-400 dark:text-neutral-500 animate-pulse">
               THE CURATOR'S VAULT
             </span>
-            <div className="w-8 h-[1px] bg-neutral-200"></div>
-            <p className="font-sans text-[9px] font-bold text-neutral-400 tracking-[0.25em] uppercase leading-relaxed max-w-xs mx-auto">
+            <div className="w-8 h-[1px] bg-neutral-200 dark:bg-neutral-800"></div>
+            <p className="font-sans text-[9px] font-bold text-neutral-400 dark:text-neutral-500 tracking-[0.25em] uppercase leading-relaxed max-w-xs mx-auto">
               NO ARCHIVED LOOKS. BROWSE THE RUNWAY TO CURATE YOUR PERSONAL MOODBOARD.
             </p>
             <button
               onClick={onCurateExamples}
-              className="mt-4 px-6 py-2.5 bg-neutral-950 text-white font-sans text-[10px] font-black tracking-[0.25em] uppercase rounded-none border border-neutral-950 hover:bg-transparent hover:text-neutral-950 active:scale-95 transition-all duration-300 cursor-pointer select-none"
+              className="mt-4 px-6 py-2.5 bg-neutral-950 dark:bg-[#F5F5F5] text-white dark:text-neutral-955 font-sans text-[10px] font-black tracking-[0.25em] uppercase rounded-none border border-neutral-950 dark:border-[#F5F5F5] hover:bg-transparent dark:hover:bg-transparent hover:text-neutral-950 dark:hover:text-[#F5F5F5] active:scale-95 transition-all duration-300 cursor-pointer select-none"
             >
               [ CURATE EXAMPLES ]
             </button>
@@ -295,15 +313,15 @@ const VaultBoard = ({
             
 
             {/* 🏷️ V5.2 頂部全局過濾器 (Tag Filter Bar) 與 V8.6 畫冊導出按鈕 */}
-            <div className="flex items-center justify-between pb-4 mb-8 border-b border-neutral-200/20 select-none">
+            <div className="flex items-center justify-between pb-4 mb-8 border-b border-neutral-200/20 dark:border-neutral-800/40 select-none">
               <div className="flex items-center gap-6 overflow-x-auto custom-scrollbar">
                 {/* ALL 預設全局按鈕 */}
                 <button
                   onClick={() => setActiveFilterTag('ALL')}
                   className={`font-sans text-[9px] font-black tracking-[0.25em] uppercase transition-all duration-300 pb-1 cursor-pointer ${
                     activeFilterTag === 'ALL'
-                      ? 'text-neutral-900 border-b-2 border-neutral-900 font-bold'
-                      : 'text-neutral-400 hover:text-neutral-900'
+                      ? 'text-neutral-900 dark:text-[#F5F5F5] border-b-2 border-neutral-900 dark:border-[#F5F5F5] font-bold'
+                      : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-[#F5F5F5]'
                   }`}
                 >
                   ALL
@@ -316,8 +334,8 @@ const VaultBoard = ({
                     onClick={() => handleTagClick(tag)}
                     className={`font-sans text-[9px] font-black tracking-[0.25em] uppercase transition-all duration-300 pb-1 cursor-pointer flex items-center gap-0.5 ${
                       activeFilterTag === tag
-                        ? 'text-neutral-900 border-b-2 border-neutral-900 font-bold'
-                        : 'text-neutral-400 hover:text-neutral-900'
+                        ? 'text-neutral-900 dark:text-[#F5F5F5] border-b-2 border-neutral-900 dark:border-[#F5F5F5] font-bold'
+                        : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-[#F5F5F5]'
                     }`}
                   >
                     #{tag}
@@ -327,7 +345,7 @@ const VaultBoard = ({
 
               <button
                 onClick={handleExportEditorialBook}
-                className="font-sans text-[9px] font-black tracking-[0.25em] uppercase text-neutral-400 hover:text-neutral-950 transition-all duration-300 pb-1 cursor-pointer shrink-0 border-none bg-transparent"
+                className="font-sans text-[9px] font-black tracking-[0.25em] uppercase text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-all duration-300 pb-1 cursor-pointer shrink-0 border-none bg-transparent"
                 title="EXPORT EDITORIAL LOOKBOOK"
               >
                 [ EXPORT BOOK ]
@@ -372,11 +390,11 @@ const VaultBoard = ({
 
             {/* 篩選結果為空時的冷淡引導 */}
             {filteredLooks.length === 0 && (
-              <div className="py-24 text-center border border-dashed border-neutral-200 rounded-[2.5rem] bg-neutral-50/50 select-none">
-                <span className="font-serif text-xl font-black text-neutral-800 tracking-[0.2em] mb-4 block">
+              <div className="py-24 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] bg-neutral-50/50 dark:bg-[#121212] select-none">
+                <span className="font-serif text-xl font-black text-neutral-800 dark:text-neutral-200 tracking-[0.2em] mb-4 block">
                   EMPTY FILTER
                 </span>
-                <p className="font-sans text-[9px] font-bold text-neutral-400 tracking-[0.2em] uppercase leading-relaxed max-w-xs mx-auto">
+                <p className="font-sans text-[9px] font-bold text-neutral-400 dark:text-neutral-500 tracking-[0.2em] uppercase leading-relaxed max-w-xs mx-auto">
                   No curated looks matching tag #{activeFilterTag}. Click another tag to reveal other inspiration archives.
                 </p>
               </div>

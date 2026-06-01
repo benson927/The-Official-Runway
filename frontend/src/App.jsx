@@ -21,6 +21,28 @@ const BASE_URL = 'http://127.0.0.1:5001/api';
  * 4. 維護左屏 Vogue Runway 數據的異步加載狀態（包含開放式查詢）。
  */
 function App() {
+  // --- 消光暗黑模式狀態 (Noir Mode - V8.7) ---
+  const [isNoirMode, setIsNoirMode] = useState(() => {
+    try {
+      return localStorage.getItem('silent_archive_noir_mode') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (isNoirMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('silent_archive_noir_mode', String(isNoirMode));
+    } catch (e) {
+      console.error("無法寫入本地暗黑模式設定:", e);
+    }
+  }, [isNoirMode]);
+
   // --- 全局 Toast 通知狀態 ---
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const toastRef = useRef(null);
@@ -769,6 +791,8 @@ function App() {
     <div className="w-screen h-screen overflow-hidden">
       {/* 雙屏核心佈局，完美融合左側 Runway 秀場與右側 私人策展情緒板 */}
       <SplitViewLayout
+        isNoirMode={isNoirMode}
+        toggleNoirMode={() => setIsNoirMode(prev => !prev)}
         // 左半屏 Runway 屬性
         runwayLooks={runwayLooks}
         runwayLoading={runwayLoading}

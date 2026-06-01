@@ -26,6 +26,9 @@ const BRAND_INSTAGRAM_HANDLES = {
  * 4. 佈局絕對穩定 (CLS = 0)：利用絕對定位 (absolute inset-0) 重疊交替畫布，鎖定視窗，避免任何高度跳動或滾動條位移。
  */
 const SplitViewLayout = ({
+  isNoirMode,
+  toggleNoirMode,
+
   // Runway 屬性
   runwayLooks,
   runwayLoading,
@@ -374,18 +377,18 @@ const SplitViewLayout = ({
   const showPinButton = currentDesigner && !isCurrentPinned;
 
   return (
-    <div className={`w-screen h-screen flex flex-col transition-colors duration-300 overflow-hidden selection:bg-[#1A1A1A] selection:text-white ${
-      activeView === 'runway' ? 'bg-[#F5F5F5] text-[#1A1A1A]' : 'bg-white text-[#1A1A1A]'
+    <div className={`w-screen h-screen flex flex-col transition-colors duration-500 overflow-hidden selection:bg-[#1A1A1A] selection:text-white dark:selection:bg-[#F5F5F5] dark:selection:text-black ${
+      activeView === 'runway' ? 'bg-[#F5F5F5] text-[#1A1A1A] dark:bg-[#0A0A0A] dark:text-[#F5F5F5]' : 'bg-white text-[#1A1A1A] dark:bg-[#121212] dark:text-[#F5F5F5]'
     }`}>
       
       {/* ================================================== */}
       {/* ⛩ V7.2 全局導覽樞紐 (Global Navigation Bar - Fixed) */}
       {/* ================================================== */}
-      <header className={`fixed top-0 left-0 w-full z-50 backdrop-blur-md px-12 py-6 border-b border-neutral-200/20 flex items-center justify-between transition-colors duration-300 select-none ${
-        activeView === 'runway' ? 'bg-[#F5F5F5]/80' : 'bg-white/80'
+      <header className={`fixed top-0 left-0 w-full z-50 backdrop-blur-md px-12 py-6 border-b border-neutral-200/20 dark:border-neutral-800/40 flex items-center justify-between transition-colors duration-500 select-none ${
+        activeView === 'runway' ? 'bg-[#F5F5F5]/80 dark:bg-[#0A0A0A]/80' : 'bg-white/80 dark:bg-[#121212]/80'
       }`}>
         {/* Left Logo */}
-        <h1 className="font-serif text-2xl tracking-[0.05em] font-black uppercase text-neutral-900 select-none">
+        <h1 className="font-serif text-2xl tracking-[0.05em] font-black uppercase text-neutral-900 dark:text-[#F5F5F5] select-none">
           THE SILENT ARCHIVE
         </h1>
 
@@ -395,19 +398,19 @@ const SplitViewLayout = ({
             onClick={() => handleViewSwitch('runway')}
             className={`transition-all duration-300 pb-0.5 cursor-pointer border-none bg-transparent ${
               activeView === 'runway'
-                ? 'text-neutral-900 border-b-2 border-neutral-900 font-bold'
-                : 'text-neutral-300 hover:text-neutral-900'
+                ? 'text-neutral-900 dark:text-[#F5F5F5] border-b-2 border-neutral-900 dark:border-[#F5F5F5] font-bold'
+                : 'text-neutral-300 dark:text-neutral-700 hover:text-neutral-900 dark:hover:text-[#F5F5F5]'
             }`}
           >
             [ RUNWAY ]
           </button>
-          <span className="text-neutral-200">/</span>
+          <span className="text-neutral-200 dark:text-neutral-800">/</span>
           <button
             onClick={() => handleViewSwitch('vault')}
             className={`transition-all duration-300 pb-0.5 cursor-pointer border-none bg-transparent ${
               activeView === 'vault'
-                ? 'text-neutral-900 border-b-2 border-neutral-900 font-bold'
-                : 'text-neutral-300 hover:text-neutral-900'
+                ? 'text-neutral-900 dark:text-[#F5F5F5] border-b-2 border-neutral-900 dark:border-[#F5F5F5] font-bold'
+                : 'text-neutral-300 dark:text-neutral-700 hover:text-neutral-900 dark:hover:text-[#F5F5F5]'
             }`}
           >
             [ THE VAULT ]
@@ -416,6 +419,14 @@ const SplitViewLayout = ({
 
         {/* Right Curated Statistics & Custom Passcode */}
         <div className="flex items-center gap-6 select-none">
+          {/* Noir Mode Toggle Button (V8.7) */}
+          <button
+            onClick={toggleNoirMode}
+            className="font-sans text-[10px] font-black tracking-widest text-neutral-400 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors uppercase border-none bg-transparent cursor-pointer"
+          >
+            {isNoirMode ? '[ LIGHT_ ]' : '[ NOIR_ ]'}
+          </button>
+
           {isChangingPasscode ? (
             <div className="flex items-center">
               <input
@@ -441,21 +452,21 @@ const SplitViewLayout = ({
                 }}
                 onBlur={() => setIsChangingPasscode(false)}
                 placeholder="NEW PASSCODE"
-                className="bg-transparent border-b border-neutral-900/20 text-[10px] font-sans font-black tracking-widest text-neutral-950 placeholder-neutral-300 focus:outline-none w-28 uppercase text-right"
+                className="bg-transparent border-b border-neutral-900/20 dark:border-neutral-100/20 text-[10px] font-sans font-black tracking-widest text-neutral-950 dark:text-[#F5F5F5] placeholder-neutral-300 dark:placeholder-neutral-700 focus:outline-none w-28 uppercase text-right"
                 autoFocus
               />
-              <span className="font-mono text-[10px] text-neutral-900 ml-0.5 animate-blink">_</span>
+              <span className="font-mono text-[10px] text-neutral-900 dark:text-[#F5F5F5] ml-0.5 animate-blink">_</span>
             </div>
           ) : (
             <button
               onClick={() => setIsChangingPasscode(true)}
-              className="font-sans text-[10px] font-black tracking-widest text-neutral-400 hover:text-neutral-950 transition-colors uppercase border-none bg-transparent cursor-pointer"
+              className="font-sans text-[10px] font-black tracking-widest text-neutral-400 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors uppercase border-none bg-transparent cursor-pointer"
             >
               [ SET KEY ]
             </button>
           )}
 
-          <span className="font-sans text-[10px] font-black tracking-widest text-neutral-400 uppercase select-none">
+          <span className="font-sans text-[10px] font-black tracking-widest text-neutral-400 dark:text-neutral-500 uppercase select-none">
             {archivedLooks.length} ITEMS CURATED
           </span>
         </div>
@@ -495,7 +506,7 @@ const SplitViewLayout = ({
         >
           {/* V7.4 巨型品牌浮水印背景 (The Mega-Typography Watermark) */}
           <div className="absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center z-0">
-            <span className="font-serif text-[13vw] font-black uppercase text-neutral-950/[0.03] tracking-[0.05em] whitespace-nowrap">
+            <span className="font-serif text-[13vw] font-black uppercase text-neutral-950/[0.03] dark:text-[#F5F5F5]/[0.03] tracking-[0.05em] whitespace-nowrap">
               {currentDesigner.replace(/-/g, ' ')}
             </span>
           </div>
@@ -503,14 +514,14 @@ const SplitViewLayout = ({
           <div className="w-full max-w-7xl mx-auto px-12 py-8 flex flex-col gap-6 relative z-10">
             
             {/* 品牌快捷與搜尋列 */}
-            <div className="flex flex-wrap items-center justify-between gap-4 py-2 border-t border-b border-neutral-200/40 text-xs font-bold tracking-widest text-neutral-400 uppercase select-none mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-4 py-2 border-t border-b border-neutral-200/40 dark:border-neutral-800/40 text-xs font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase select-none mb-3">
               {/* 品牌列表 */}
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
                 {shortcuts.map((d, index) => {
                   const isActive = currentDesigner === d.value;
                   return (
                     <React.Fragment key={d.value}>
-                      {index > 0 && <span className="text-neutral-200 select-none">.</span>}
+                      {index > 0 && <span className="text-neutral-200 dark:text-neutral-800 select-none">.</span>}
                       <div 
                         draggable="true"
                         onDragStart={(e) => handleDragStart(e, index)}
@@ -526,14 +537,14 @@ const SplitViewLayout = ({
                           onClick={() => onFetchRunway(d.value)}
                           disabled={runwayLoading}
                           className={`transition-colors font-sans font-black tracking-widest uppercase border-none bg-transparent cursor-pointer ${
-                            isActive ? 'text-neutral-950 font-black' : 'text-neutral-400 hover:text-neutral-950'
+                            isActive ? 'text-neutral-950 dark:text-[#F5F5F5] font-black' : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-[#F5F5F5]'
                           }`}
                         >
                           {d.label.replace('STUDIOS', '').replace('KOSTADINOV', '').replace('MARGIELA', '')}
                         </button>
                         <span 
                           onClick={(e) => handleShortcutDelete(e, d.value)}
-                          className="text-[8px] text-neutral-300 hover:text-neutral-950 cursor-pointer hidden group-hover:inline ml-0.5"
+                          className="text-[8px] text-neutral-300 dark:text-neutral-700 hover:text-neutral-950 dark:hover:text-[#F5F5F5] cursor-pointer hidden group-hover:inline ml-0.5"
                         >
                           ×
                         </span>
@@ -545,11 +556,11 @@ const SplitViewLayout = ({
                 {/* PIN 按鈕 */}
                 {showPinButton && (
                   <>
-                    <span className="text-neutral-200">.</span>
+                    <span className="text-neutral-200 dark:text-neutral-800">.</span>
                     <button
                       onClick={() => onAddShortcut(currentDesigner)}
                       disabled={runwayLoading || shortcuts.length >= 8}
-                      className="text-neutral-400 hover:text-neutral-950 transition-colors font-sans font-black tracking-widest cursor-pointer disabled:opacity-40 border-none bg-transparent"
+                      className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors font-sans font-black tracking-widest cursor-pointer disabled:opacity-40 border-none bg-transparent"
                       title="PIN TO SHORTCUTS"
                     >
                       [+ PIN]
@@ -568,15 +579,15 @@ const SplitViewLayout = ({
                     onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => setIsSearchFocused(false)}
                     placeholder="SEARCH DESIGNER ARCHIVE" 
-                    className="bg-transparent text-neutral-950 font-mono text-[11px] font-bold tracking-[0.15em] placeholder-neutral-400 focus:outline-none w-40 uppercase text-right"
+                    className="bg-transparent text-neutral-950 dark:text-[#F5F5F5] font-mono text-[11px] font-bold tracking-[0.15em] placeholder-neutral-400 dark:placeholder-neutral-700 focus:outline-none w-40 uppercase text-right"
                     disabled={runwayLoading}
                   />
-                  <span className="search-cursor font-mono text-[11px] font-bold text-neutral-900 ml-0.5">_</span>
+                  <span className="search-cursor font-mono text-[11px] font-bold text-neutral-900 dark:text-[#F5F5F5] ml-0.5">_</span>
                 </div>
 
                 {/* ✦ V8.4 Autocomplete 聯想下拉選單 */}
                 {isSearchFocused && searchSuggestions.length > 0 && (
-                  <div className="absolute right-0 top-full mt-2 bg-white border border-neutral-900/10 text-neutral-950 font-mono text-[10px] w-48 shadow-2xl z-50 rounded-none text-left py-1 select-none backdrop-blur-md bg-white/95">
+                  <div className="absolute right-0 top-full mt-2 bg-white dark:bg-neutral-900 border border-neutral-900/10 dark:border-neutral-800 text-neutral-950 dark:text-[#F5F5F5] font-mono text-[10px] w-48 shadow-2xl z-50 rounded-none text-left py-1 select-none backdrop-blur-md bg-white/95 dark:bg-neutral-900/95">
                     {searchSuggestions.map(s => (
                       <div 
                         key={s}
@@ -586,7 +597,7 @@ const SplitViewLayout = ({
                           setDesignerInput('');
                           setIsSearchFocused(false);
                         }}
-                        className="px-3 py-2 hover:bg-neutral-950 hover:text-white cursor-pointer transition-colors duration-150 tracking-widest uppercase font-bold"
+                        className="px-3 py-2 hover:bg-neutral-950 hover:text-white dark:hover:bg-[#F5F5F5] dark:hover:text-black cursor-pointer transition-colors duration-150 tracking-widest uppercase font-bold"
                       >
                         {s}
                       </div>
@@ -597,7 +608,7 @@ const SplitViewLayout = ({
                 <button 
                   type="submit"
                   disabled={runwayLoading}
-                  className="font-sans text-[11px] font-black tracking-widest text-neutral-400 hover:text-neutral-950 transition-colors uppercase ml-2 cursor-pointer select-none border-none bg-transparent"
+                  className="font-sans text-[11px] font-black tracking-widest text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors uppercase ml-2 cursor-pointer select-none border-none bg-transparent"
                 >
                   [ CREATE ]
                 </button>
@@ -632,8 +643,8 @@ const SplitViewLayout = ({
                     >
                       <span className={`font-mono text-[11px] tracking-widest uppercase transition-all ${
                         isActive 
-                          ? 'text-neutral-950 font-black border-b border-neutral-950 pb-0.5' 
-                          : 'text-neutral-400 hover:text-neutral-600'
+                          ? 'text-neutral-950 dark:text-[#F5F5F5] font-black border-b border-neutral-950 dark:border-[#F5F5F5] pb-0.5' 
+                          : 'text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400'
                       }`}>
                         {shortName}
                       </span>
@@ -646,8 +657,8 @@ const SplitViewLayout = ({
             {/* 秀場圖片大畫布 */}
             {runwayLoading ? (
               <div className="flex flex-col items-center justify-center py-40 gap-4 text-center select-none">
-                <div className="w-6 h-6 border-2 border-neutral-950 border-t-transparent rounded-full animate-spin"></div>
-                <span className="font-serif text-[11px] font-black tracking-[0.3em] uppercase text-neutral-400 animate-pulse">
+                <div className="w-6 h-6 border-2 border-neutral-950 dark:border-[#F5F5F5] border-t-transparent rounded-full animate-spin"></div>
+                <span className="font-serif text-[11px] font-black tracking-[0.3em] uppercase text-neutral-400 dark:text-neutral-500 animate-pulse">
                   EXTRACTING FASHION ARCHIVE...
                 </span>
               </div>
@@ -655,12 +666,12 @@ const SplitViewLayout = ({
               <div className="w-full">
                 
                 {/* V7.1.2 時裝雜誌跨頁結構化資訊區 */}
-                <div className="mb-10 pb-4 border-b border-neutral-200/60 font-sans flex flex-col gap-2">
-                  <h2 className="font-serif text-3xl font-black tracking-wider text-neutral-900 uppercase leading-tight select-none">
+                <div className="mb-10 pb-4 border-b border-neutral-200/60 dark:border-neutral-800/60 font-sans flex flex-col gap-2">
+                  <h2 className="font-serif text-3xl font-black tracking-wider text-neutral-900 dark:text-[#F5F5F5] uppercase leading-tight select-none">
                     {currentDesigner.replace(/-/g, ' ')}
                   </h2>
                   
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[10px] font-bold tracking-widest uppercase text-neutral-500">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[10px] font-bold tracking-widest uppercase text-neutral-500 dark:text-neutral-500">
                     <div className="select-none">
                       {currentSeason.replace('Ready-to-Wear', 'RTW')} // {runwayLooks.length} LOOKS MATCHED
                     </div>
@@ -671,7 +682,7 @@ const SplitViewLayout = ({
                           href={`https://www.instagram.com/${getInstagramHandle(currentDesigner)}/`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-neutral-400 hover:text-neutral-950 transition-colors duration-300 select-none whitespace-nowrap"
+                          className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors duration-300 select-none whitespace-nowrap"
                         >
                           [ @{getInstagramHandle(currentDesigner).toUpperCase()} ↗ ]
                         </a>
@@ -682,7 +693,7 @@ const SplitViewLayout = ({
                           href={videoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-neutral-400 hover:text-neutral-950 transition-colors duration-300 select-none whitespace-nowrap"
+                          className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors duration-300 select-none whitespace-nowrap"
                         >
                           [ WATCH SHOW ↗ ]
                         </a>
@@ -691,7 +702,7 @@ const SplitViewLayout = ({
                           href={sourceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-neutral-400 hover:text-neutral-950 transition-colors duration-300 select-none whitespace-nowrap"
+                          className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-[#F5F5F5] transition-colors duration-300 select-none whitespace-nowrap"
                         >
                           [ VOGUE SOURCE ↗ ]
                         </a>
@@ -735,13 +746,13 @@ const SplitViewLayout = ({
                 {activeView === 'runway' && currentDesigner?.toLowerCase() === 'prada' && (
                   <div 
                     ref={margeliaRef}
-                    className="mt-24 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-neutral-200 pt-6 pb-4 select-none text-neutral-400 font-serif opacity-0"
+                    className="mt-24 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-neutral-200 dark:border-neutral-800 pt-6 pb-4 select-none text-neutral-400 dark:text-neutral-600 font-serif opacity-0"
                   >
-                    <span className="font-black tracking-[0.25em] text-neutral-900 text-[8px] uppercase">
+                    <span className="font-black tracking-[0.25em] text-neutral-900 dark:text-[#F5F5F5] text-[8px] uppercase">
                       MARGELIA / [ DWP II ]
                     </span>
                     <div className="flex items-center gap-4">
-                      <span className="tracking-[0.18em] text-[7.5px] text-neutral-400 uppercase leading-relaxed text-left md:text-right max-w-xl">
+                      <span className="tracking-[0.18em] text-[7.5px] text-neutral-400 dark:text-neutral-500 uppercase leading-relaxed text-left md:text-right max-w-xl">
                         "The future isn't analog, Andrea. It's archived. This vault is the architecture of desire."
                       </span>
                       <span 
@@ -754,12 +765,12 @@ const SplitViewLayout = ({
 
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-40 text-center border-2 border-dashed border-neutral-200 rounded-[3rem] bg-neutral-50/50 max-w-md mx-auto px-8 select-none">
-                <span className="font-serif text-3xl font-black text-neutral-800 tracking-[0.2em] mb-4">
+              <div className="flex flex-col items-center justify-center py-40 text-center border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-[3rem] bg-neutral-50/50 dark:bg-neutral-950/20 max-w-md mx-auto px-8 select-none">
+                <span className="font-serif text-3xl font-black text-neutral-800 dark:text-neutral-200 tracking-[0.2em] mb-4">
                   SILENT
                 </span>
-                <div className="w-10 h-[1px] bg-neutral-900 mb-6"></div>
-                <p className="font-sans text-[10px] font-bold text-neutral-400 tracking-[0.2em] uppercase leading-relaxed">
+                <div className="w-10 h-[1px] bg-neutral-900 dark:bg-[#F5F5F5] mb-6"></div>
+                <p className="font-sans text-[10px] font-bold text-neutral-400 dark:text-neutral-500 tracking-[0.2em] uppercase leading-relaxed">
                   Awaiting archive parameters. Select a fashion house above to initiate curation lookup.
                 </p>
               </div>
