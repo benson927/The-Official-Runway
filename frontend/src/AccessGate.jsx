@@ -275,6 +275,12 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
               INCORRECT PASSCODE. PLEASE TRY AGAIN.
             </p>
           )}
+
+          <div className="mt-8 opacity-25 dark:opacity-40 select-none">
+            <span className="font-sans text-[8px] font-black text-neutral-500 dark:text-neutral-500 tracking-[0.3em] uppercase">
+              THE SILENT ARCHIVE WORKSTATION // DEVELOPED BY BENSON
+            </span>
+          </div>
         </div>
       )}
 

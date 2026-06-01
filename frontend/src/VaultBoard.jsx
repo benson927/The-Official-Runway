@@ -195,7 +195,7 @@ const VaultBoard = ({
           ${looksHtml}
         </div>
         <footer>
-          <div class="disclaimer">FOR PERSONAL / INTERNAL EDITORIAL PRESENTATION ONLY // IMAGES COPYRIGHT BY GORUNWAY & VOGUE RUNWAY</div>
+          <div class="disclaimer">THE SILENT ARCHIVE WORKSTATION DEVELOPED BY BENSON // FOR PERSONAL / INTERNAL EDITORIAL PRESENTATION ONLY // IMAGES COPYRIGHT BY GORUNWAY & VOGUE RUNWAY</div>
         </footer>
         <script>
           window.onload = function() {

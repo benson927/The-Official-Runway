@@ -388,9 +388,14 @@ const SplitViewLayout = ({
         activeView === 'runway' ? 'bg-[#F5F5F5]/80 dark:bg-[#0A0A0A]/80' : 'bg-white/80 dark:bg-[#121212]/80'
       }`}>
         {/* Left Logo */}
-        <h1 className="font-serif text-2xl tracking-[0.05em] font-black uppercase text-neutral-900 dark:text-[#F5F5F5] select-none">
-          THE SILENT ARCHIVE
-        </h1>
+        <div className="flex flex-col gap-0.5 select-none">
+          <h1 className="font-serif text-2xl tracking-[0.05em] font-black uppercase text-neutral-900 dark:text-[#F5F5F5]">
+            THE SILENT ARCHIVE
+          </h1>
+          <span className="font-sans text-[8px] font-black tracking-[0.3em] text-neutral-400 dark:text-neutral-600 uppercase">
+            DEVELOPED BY BENSON
+          </span>
+        </div>
 
         {/* Center View Switcher */}
         <div className="flex items-center gap-4 text-xs font-black tracking-[0.25em] uppercase">

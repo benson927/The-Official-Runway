@@ -110,6 +110,7 @@ cd frontend && npm run dev
 
 本系統為私人時裝策展工作站，在展示與獲取時裝秀場圖片時，遵循以下著作權協議：
 
+* **系統開發權利**：本 `THE SILENT ARCHIVE` 時裝金庫系統、實時 Vogue Runway 秀場爬蟲微服務與前端 3D 物理推擠渲染代碼，皆由 **Benson** 獨立設計與開發，保留所有軟體著作權。
 * **非商業個人研究**：本系統僅供個人學術研究、時裝廓形分析、內部提案草案（Moodboard）之目的使用，不含任何商業營利行為。符合著作權法中關於「合理使用 (Fair Use)」的規範。
 * **版權歸屬**：所有秀場圖片與時裝 Looks 之著作權與版權均歸屬於 **GoRunway**、**Vogue Runway**、原攝影師以及各大時裝屋（Fashion Houses）所有。
-* **導出標記**：當點擊 `[ EXPORT BOOK ]` 導出提案畫冊時，系統會自動在頁面註腳標記為 `FOR PERSONAL/INTERNAL EDITORIAL PRESENTATION ONLY`，以維護原作者版權與學術引用規範。
+* **導出標記**：當點擊 `[ EXPORT BOOK ]` 導出提案畫冊時，系統會自動在頁面註腳標記為 `THE SILENT ARCHIVE WORKSTATION DEVELOPED BY BENSON // FOR PERSONAL/INTERNAL EDITORIAL PRESENTATION ONLY`，以維護原作者版權、系統開發者著作權與學術引用規範。
