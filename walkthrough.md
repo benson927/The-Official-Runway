@@ -16,15 +16,6 @@
 *   **PDF 列印註腳同步**：在 `VaultBoard.jsx` 點擊 `[ EXPORT BOOK ]` 生成的高解析度時裝提案畫冊 HTML 與 PDF 列印頁面中，將原有的 Disclaimer 註腳補充更新為 `THE SILENT ARCHIVE WORKSTATION DEVELOPED BY BENSON // FOR PERSONAL / INTERNAL EDITORIAL PRESENTATION ONLY // IMAGES COPYRIGHT BY GORUNWAY & VOGUE RUNWAY`。
 *   **合規防護**：保證在導出高解析度排版提案畫冊時，能維護 Vogue Runway / GoRunway 的圖像著作權，同時明確表明本工作站系統為 Benson 獨立開發的非商業個人學術研究成果。
 
-## 🎥 自動化系統演示錄影 (Automated System Demos)
-
-為了方便期末展示或回顧，我們使用 Playwright 自動化模擬了策展人的一整套系統操作流程，並錄製了高清 webm 影片檔案存放於本地：
-
-*   **主系統完整功能演示影片**：[silent_archive_main_demo.webm](file:///Users/bensonhong/Desktop/Antigravity專案/Runway(行動平台期末個人)/scratch/videos/silent_archive_main_demo.webm)
-    *   *內容包含*：25 幀高速黑白蒙太奇閃影、門禁解鎖、ACNE STUDIOS 秀場加載與暗房顯影、滑鼠物理推擠 (Fluid Grid) 漣漪特效、PRADA 搜尋與底部 Margelia Spec 惡魔脈搏呼吸紅點、細部沉浸放大鏡影片播放、卡片 Curate 收藏、進入金庫看版 (The Vault)、Noir 消光暗黑模式與 Light 明亮模式平滑切換。
-*   **畫冊提案排冊導出演示影片**：[silent_archive_export_demo.webm](file:///Users/bensonhong/Desktop/Antigravity專案/Runway(行動平台期末個人)/scratch/videos/silent_archive_export_demo.webm)
-    *   *內容包含*：點擊 `[ EXPORT BOOK ]` 彈出高解析度雙欄排版網頁，並展示 Footer 的 Benson 開發者聲明與 Vogue 圖片版權合規註腳。
-
 ---
 
 # COP.VISION 系統優化更新紀錄 (V7.5)
