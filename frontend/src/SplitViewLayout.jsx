@@ -61,6 +61,9 @@ const SplitViewLayout = ({
   
   // V7.2 全局切換器視角與極速過渡狀態
   const [activeView, setActiveView] = useState('runway');
+  
+  // ✦ 季度時間軸容器 Ref
+  const timelineRef = useRef(null);
 
   // 取得品牌對應的 Instagram 帳號 (若無映射則以格式化後的品牌名稱作為 Fallback 自癒)
   const getInstagramHandle = (designer) => {
@@ -105,6 +108,26 @@ const SplitViewLayout = ({
   // V7.8 Margelia Spec (邊緣特刊) 參照
   const margeliaRef = useRef();
   const pulseRef = useRef();
+
+  // ✦ 季度時間軸選中項平滑滾動置中 (ScrollTo Alignment)
+  useGSAP(() => {
+    if (!timelineRef.current || !currentSeason) return;
+    const activeEl = timelineRef.current.querySelector('.timeline-season-btn-active');
+    if (!activeEl) return;
+
+    const container = timelineRef.current;
+    const containerWidth = container.clientWidth;
+    const itemOffset = activeEl.offsetLeft;
+    const itemWidth = activeEl.clientWidth;
+    const targetScrollLeft = itemOffset - (containerWidth / 2) + (itemWidth / 2);
+
+    gsap.to(container, {
+      scrollLeft: targetScrollLeft,
+      duration: 0.6,
+      ease: "power3.out",
+      overwrite: "auto"
+    });
+  }, { dependencies: [currentSeason, seasons], scope: timelineRef });
 
   // V7.6.2 & V7.7 基於官方 .gsap-rules.md 與 .cursorrules 對齊之 React 最佳實踐
   // - 使用 scope: containerRef 隔離選擇器，確保無全局 DOM 污染
@@ -185,22 +208,43 @@ const SplitViewLayout = ({
     const currentScales = new Map();
     images.forEach(img => currentScales.set(img, 1));
 
+    // ✦ 預先計算並快取圖片中心點（相對於 document），徹底消除 pointermove 中的 getBoundingClientRect() (Avoid Layout Thrashing)
+    const imageCoords = new Map();
+    const updateCoordsCache = () => {
+      images.forEach(img => {
+        const rect = img.getBoundingClientRect();
+        imageCoords.set(img, {
+          cx: rect.left + rect.width / 2 + window.scrollX,
+          cy: rect.top + rect.height / 2 + window.scrollY
+        });
+      });
+    };
+
+    // 初始化快取
+    updateCoordsCache();
+
+    // 監聽視窗 Resize 重新整理快取
+    const handleResize = () => {
+      updateCoordsCache();
+    };
+    window.addEventListener('resize', handleResize);
+
     let ticking = false;
 
     // 物理距離運算與節流函數
     const handlePointerMove = contextSafe((e) => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const mx = e.clientX;
-          const my = e.clientY;
+          // 使用相對於 document 的座標系統進行精準運算
+          const mx = e.clientX + window.scrollX;
+          const my = e.clientY + window.scrollY;
           const maxDist = 380; // 滑鼠感應物理半徑 (px)
 
           images.forEach(img => {
-            const rect = img.getBoundingClientRect();
-            // 計算圖片中心點
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            const dist = Math.hypot(cx - mx, cy - my);
+            const coords = imageCoords.get(img);
+            if (!coords) return;
+
+            const dist = Math.hypot(coords.cx - mx, coords.cy - my);
 
             let targetScale = 1;
             if (dist < maxDist) {
@@ -253,6 +297,7 @@ const SplitViewLayout = ({
     return () => {
       container.removeEventListener('pointermove', handlePointerMove);
       container.removeEventListener('pointerleave', handlePointerLeave);
+      window.removeEventListener('resize', handleResize);
       images.forEach(img => {
         gsap.killTweensOf(img);
         gsap.set(img, { scale: 1 });
@@ -474,7 +519,10 @@ const SplitViewLayout = ({
 
             {/* Timeline Slider */}
             {seasons.length > 0 && (
-              <div className="flex items-center gap-5 overflow-x-auto scrollbar-none py-1 relative w-full select-none mb-3">
+              <div 
+                ref={timelineRef}
+                className="flex items-center gap-5 overflow-x-auto scrollbar-none py-1 relative w-full select-none mb-3"
+              >
                 {seasons.map((s) => {
                   const isActive = currentSeason.toLowerCase() === s.season_name.toLowerCase();
                   
@@ -491,7 +539,9 @@ const SplitViewLayout = ({
                     <div 
                       key={s.season_name}
                       onClick={() => !runwayLoading && onSelectSeason(s.season_name)}
-                      className="flex items-center cursor-pointer shrink-0 transition-all"
+                      className={`flex items-center cursor-pointer shrink-0 transition-all timeline-season-btn ${
+                        isActive ? 'timeline-season-btn-active' : ''
+                      }`}
                     >
                       <span className={`font-mono text-[11px] tracking-widest uppercase transition-all ${
                         isActive 

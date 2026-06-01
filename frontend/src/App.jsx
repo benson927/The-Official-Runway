@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 import SplitViewLayout from './SplitViewLayout';
 import ImmersiveZoom from './ImmersiveZoom';
 import AccessGate from './AccessGate';
 import { supabase } from './utils/supabaseClient';
+
+gsap.registerPlugin(useGSAP);
 
 // 後端 API 基礎路徑 (Flask 運行於 Port 5001 - 用於左屏抓取)
 const BASE_URL = 'http://127.0.0.1:5001/api';
@@ -19,6 +23,35 @@ const BASE_URL = 'http://127.0.0.1:5001/api';
 function App() {
   // --- 全局 Toast 通知狀態 ---
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
+  const toastRef = useRef(null);
+
+  // ✦ Toast 進退場 GSAP 動畫控制
+  useGSAP(() => {
+    if (toast.show) {
+      gsap.fromTo(toastRef.current,
+        { y: 40, autoAlpha: 0, scale: 0.95 },
+        { 
+          y: 0, 
+          autoAlpha: 1, 
+          scale: 1,
+          duration: 0.5, 
+          ease: "back.out(1.5)",
+          overwrite: "auto"
+        }
+      );
+    } else {
+      gsap.to(toastRef.current,
+        { 
+          y: 20, 
+          autoAlpha: 0, 
+          scale: 0.95,
+          duration: 0.4, 
+          ease: "power3.in",
+          overwrite: "auto"
+        }
+      );
+    }
+  }, { dependencies: [toast.show] });
 
   // --- ⛩ V5.9 蒙太奇門禁解鎖狀態 ---
   const [isUnlocked, setIsUnlocked] = useState(() => {
@@ -543,15 +576,17 @@ function App() {
       <AccessGate isUnlocked={isUnlocked} setIsUnlocked={setIsUnlocked} />
 
       {/* 全局冷淡美學 Toast 通知 */}
-      {toast.show && (
-        <div className={`fixed bottom-10 right-10 px-8 py-4 rounded-2xl shadow-2xl z-[100] font-sans font-black text-xs tracking-widest uppercase transition-all duration-500 border ${
+      <div 
+        ref={toastRef}
+        className={`fixed bottom-10 right-10 px-8 py-4 rounded-none shadow-2xl z-[100] font-sans font-black text-xs tracking-widest uppercase border ${
           toast.type === 'error' 
             ? 'bg-red-500 border-red-600 text-white' 
             : 'bg-neutral-900 border-neutral-800 text-white'
-        }`}>
-          {toast.message}
-        </div>
-      )}
+        }`}
+        style={{ opacity: 0, visibility: 'hidden' }}
+      >
+        {toast.message}
+      </div>
     </div>
   );
 }

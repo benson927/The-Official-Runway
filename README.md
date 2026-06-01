@@ -51,14 +51,14 @@ OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ### 1. 啟動後端服務
 後端服務啟動時將載入 The Silent CLI 規範，自動輸出當前的 SQLite 快取狀態與 API 端點：
 ```bash
-cd "/Users/bensonhong/Desktop/Antigravity專案/secondtool" && python3 backend/app.py
+python3 backend/app.py
 ```
 - 後端預設運行端點：`http://127.0.0.1:5001`
 
 ### 2. 啟動前端工作站
 進入前端目錄並啟動 Vite 開發伺服器：
 ```bash
-cd "/Users/bensonhong/Desktop/Antigravity專案/secondtool/frontend" && npm run dev
+cd frontend && npm run dev
 ```
 - 前端工作站訪問網址：`http://localhost:5173/`
 

@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 
 // 🏛 V5.9 蒙太奇閃影高清時裝大圖圖源 (來自 Kiko Kostadinov 經典季度)
 const UNIQUE_MONTAGE_IMAGES = [
@@ -41,6 +45,33 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
   const [passcodeInput, setPasscodeInput] = useState('');
   const [lockState, setLockState] = useState('LOCKED'); // LOCKED | GRANTED | DENIED
   const inputRef = useRef(null);
+  const gateRef = useRef(null);
+
+  useGSAP(() => {
+    if (lockState === 'GRANTED') {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setIsUnlocked(true);
+        }
+      });
+      tl.to('.gate-center-ui', {
+        opacity: 0,
+        scale: 0.92,
+        duration: 0.4,
+        ease: "power2.out"
+      });
+      tl.to('.gate-left', {
+        xPercent: -100,
+        duration: 1.2,
+        ease: "power4.inOut"
+      }, "-=0.2");
+      tl.to('.gate-right', {
+        xPercent: 100,
+        duration: 1.2,
+        ease: "power4.inOut"
+      }, "-=1.2");
+    }
+  }, { dependencies: [lockState] });
 
   // 1. 圖片打亂與預加載 (Preload)，避免極速蒙太奇閃白屏，極致優化效能與隨機藝術性
   useEffect(() => {
@@ -111,11 +142,6 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
       } catch (err) {
         console.error(err);
       }
-      
-      // 給予 400ms 展示 ACCESS GRANTED 後優雅淡出
-      setTimeout(() => {
-        setIsUnlocked(true);
-      }, 400);
     }
   };
 
@@ -140,21 +166,20 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-[1000ms] cubic-bezier(0.16, 1, 0.3, 1) select-none ${
-        lockState === 'GRANTED'
-          ? 'opacity-0 pointer-events-none scale-105'
-          : 'opacity-100'
-      }`}
-      style={{
-        backgroundColor: '#F5F5F5',
-        willChange: 'transform, opacity'
-      }}
+      ref={gateRef}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center select-none bg-transparent overflow-hidden"
     >
+      <div 
+        className="gate-left absolute left-0 top-0 w-1/2 h-full bg-[#F5F5F5] border-r border-neutral-200/20 z-0"
+        style={{ willChange: 'transform' }}
+      />
+      <div 
+        className="gate-right absolute right-0 top-0 w-1/2 h-full bg-[#F5F5F5] z-0"
+        style={{ willChange: 'transform' }}
+      />
       
-      {/* 🧬 蒙太奇閃影雙重背景層 (中央 Framed Portrait + 底層高斯模糊 + 左右時裝藝廊排版) */}
       {isMontageActive && (
-        <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black">
-          {/* 1. 底層：滿版高斯模糊光影 */}
+        <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-black z-10">
           <div 
             className="absolute inset-0 bg-cover bg-center transition-all duration-75 scale-110 opacity-30"
             style={{
@@ -163,7 +188,6 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
             }}
           />
 
-          {/* 2. 左側：時裝藝廊 Show Notes */}
           <div className="absolute left-[6vw] md:left-[8vw] top-0 bottom-0 flex flex-col items-center justify-center pointer-events-none z-10 select-none">
             <span 
               className="text-[10vh] font-serif font-black tracking-[0.4em] text-white/[0.02] uppercase select-none" 
@@ -180,7 +204,6 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
             </span>
           </div>
 
-          {/* 3. 前景：中央直式黃金比例時裝框 (完整全身 Look) */}
           <div 
             className="relative h-[80vh] aspect-[2/3] bg-cover bg-center border border-white/10 shadow-2xl transition-all duration-75 rounded-sm z-20"
             style={{
@@ -189,7 +212,6 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
             }}
           />
 
-          {/* 4. 右側：時裝藝廊藝術語錄 */}
           <div className="absolute right-[6vw] md:right-[8vw] top-0 bottom-0 flex flex-col items-center justify-center pointer-events-none z-10 select-none">
             <span 
               className="text-[10vh] font-serif font-black tracking-[0.4em] text-white/[0.02] uppercase select-none" 
@@ -208,14 +230,11 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
         </div>
       )}
 
-      {/* 🔒 金庫門禁密碼鎖中央 UI (在蒙太奇結束後平滑浮現) */}
       {!isMontageActive && (
-        <div className="flex flex-col items-center text-center gap-6 animate-fade-in select-none">
+        <div className="gate-center-ui flex flex-col items-center text-center gap-6 animate-fade-in select-none z-10 relative">
           <span className="text-neutral-300 text-3xl font-serif mb-2 select-none">✦</span>
           
           <div className="relative w-72 flex flex-col items-center border-b border-dashed border-neutral-300 focus-within:border-neutral-900 transition-colors duration-500 pb-2">
-            
-            {/* 置中的大字距、全大寫無痕密碼輸入框 */}
             <input
               ref={inputRef}
               type="password"
@@ -231,7 +250,6 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
             />
           </div>
 
-          {/* 底部金庫鎖定狀態文案 */}
           <div className="h-6 flex items-center justify-center">
             {lockState === 'LOCKED' && (
               <span className="font-sans text-xs font-black text-neutral-400 tracking-[0.3em] uppercase animate-pulse">
