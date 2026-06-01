@@ -473,8 +473,8 @@ function App() {
         setArchivedLooks(prev => [inserted, ...prev]);
         showToast("LOOK LOCKED TO VAULT", "success");
         
-        // 🧬 V7.0 啟動 AI 視覺引擎非同步分析
-        triggerOracleAnalysis(inserted);
+        // 🧬 V7.0 啟動 AI 視覺引擎非同步分析 (依據方案 B 已註解停用)
+        // triggerOracleAnalysis(inserted);
       } else {
         console.error("Supabase 新增錯誤:", error);
         showToast("同步雲端失敗", "error");

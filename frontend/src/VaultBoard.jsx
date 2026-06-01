@@ -21,9 +21,13 @@ const VaultBoard = ({
 }) => {
   const [activeFilterTag, setActiveFilterTag] = useState('ALL');
 
-  // 1. 動態提取所有已收藏 Look 中的不重複標籤列表，進行字母排序
+  // 1. 動態提取所有已收藏 Look 中的不重複標籤列表，進行字母排序 (過濾掉以 ✦ 開頭的 AI 標籤)
   const allUsedTags = Array.from(
-    new Set(archivedLooks.flatMap(look => look.tags || []))
+    new Set(
+      archivedLooks
+        .flatMap(look => look.tags || [])
+        .filter(tag => !tag.startsWith('✦'))
+    )
   ).sort();
 
   // 1.5. 安全守護：如果當前選中的過濾標籤在所有已使用的標籤列表中消失了，則自動回退重置為 'ALL'

@@ -18,6 +18,7 @@ const VaultCard = ({
   isAnalyzing
 }) => {
   const { image_url, look_number, season, designer, tags = [] } = look;
+  const displayTags = tags.filter(tag => !tag.startsWith('✦'));
   const [tagInput, setTagInput] = useState('');
   const [localNote, setLocalNote] = useState(look.note || '');
   const [isFocused, setIsFocused] = useState(false);
@@ -131,9 +132,9 @@ const VaultCard = ({
             </span>
           </div>
         ) : (
-          tags.length > 0 && (
+          displayTags.length > 0 && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              {tags.map(tag => (
+              {displayTags.map(tag => (
                 <span 
                   key={tag}
                   onClick={(e) => {
