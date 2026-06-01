@@ -22,24 +22,48 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
 
+  // ✦ V8.4 Cinema HUD 狀態管理
+  const [hudText, setHudText] = useState('');
+  const [hudActive, setHudActive] = useState(false);
+  const hudTimeoutRef = useRef(null);
+
+  const showHud = (text) => {
+    if (hudTimeoutRef.current) clearTimeout(hudTimeoutRef.current);
+    setHudText(text);
+    setHudActive(true);
+    hudTimeoutRef.current = setTimeout(() => {
+      setHudActive(false);
+    }, 1200);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hudTimeoutRef.current) clearTimeout(hudTimeoutRef.current);
+    };
+  }, []);
+
   const togglePlay = () => {
     if (!iframeRef.current) return;
+    const nextState = !isPlaying;
     const command = isPlaying ? 'pauseVideo' : 'playVideo';
     iframeRef.current.contentWindow.postMessage(
       JSON.stringify({ event: 'command', func: command, args: '' }),
       '*'
     );
-    setIsPlaying(!isPlaying);
+    setIsPlaying(nextState);
+    showHud(nextState ? 'PLAY' : 'PAUSED');
   };
 
   const toggleMute = () => {
     if (!iframeRef.current) return;
+    const nextState = !isMuted;
     const command = isMuted ? 'unMute' : 'mute';
     iframeRef.current.contentWindow.postMessage(
       JSON.stringify({ event: 'command', func: command, args: '' }),
       '*'
     );
-    setIsMuted(!isMuted);
+    setIsMuted(nextState);
+    showHud(nextState ? 'UNMUTED' : 'MUTED');
   };
 
   // 解析 YouTube 直連網址為無縫自動播放與靜音循環的 Embed 嵌入路徑 (V6.6)
@@ -138,6 +162,17 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
                 allowFullScreen
                 className="w-full h-full object-cover pb-9"
               ></iframe>
+
+              {/* ✦ V8.4 Cinema HUD 狀態動態提示 */}
+              <div 
+                className={`absolute inset-0 pb-9 flex items-center justify-center bg-black/40 z-30 pointer-events-none transition-opacity duration-300 ${
+                  hudActive ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <span className="bg-neutral-950/80 backdrop-blur-md px-4 py-2 border border-neutral-800 text-white font-mono text-[10px] font-black tracking-[0.25em] uppercase select-none rounded-none">
+                  [ {hudText} ]
+                </span>
+              </div>
               
               {/* ✦ 獨家研發的高奢極簡 Brutalist 播放器控制列 */}
               <div className="absolute bottom-0 left-0 w-full bg-neutral-950/90 backdrop-blur-md py-2.5 px-6 flex items-center justify-between z-30 select-none border-t border-neutral-800/20">

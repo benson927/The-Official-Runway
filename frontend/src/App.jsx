@@ -485,6 +485,102 @@ function App() {
     }
   };
 
+  // ✦ V8.4 一鍵載入策展範例 (批次寫入 Supabase)
+  const handleCurateExamples = async () => {
+    const fallbackLooks = [
+      {
+        designer: 'kiko-kostadinov',
+        season: 'FALL 2025 MENSWEAR',
+        look_number: 30,
+        image_url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop',
+        source_url: 'https://www.vogue.com/fashion-shows/fall-2025-menswear/kiko-kostadinov',
+        instagram_handle: 'kikokostadinov',
+        note: 'Brutalist panels & pocket systems.',
+        tags: ['✦CONTRAST_STITCHING', '✦UTILITY_POCKETS', '✦BOXY_FIT']
+      },
+      {
+        designer: 'balenciaga',
+        season: 'FALL 2025 COUTURE',
+        look_number: 2,
+        image_url: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop',
+        source_url: 'https://www.vogue.com/fashion-shows/fall-2025-couture/balenciaga',
+        instagram_handle: 'balenciaga',
+        note: 'Extreme shoulder pads & couture tailoring.',
+        tags: ['✦ASYMMETRIC_CUT', '✦DOUBLE_BREASTED', '✦MINIMALIST_TAILORING', '✦BOXY_FIT']
+      },
+      {
+        designer: 'miu-miu',
+        season: 'FALL 2026 READY-TO-WEAR',
+        look_number: 1,
+        image_url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=600&auto=format&fit=crop',
+        source_url: 'https://www.vogue.com/fashion-shows/fall-2026-ready-to-wear/miu-miu',
+        instagram_handle: 'miumiu',
+        note: 'Deconstructed wool & minimal layering.',
+        tags: ['✦CONTRAST_STITCHING', '✦DECONSTRUCTED_HEM', '✦BOXY_FIT', '✦ASYMMETRIC_CUT', '✦MINIMALIST_TAILORING']
+      }
+    ];
+
+    let presetLooks = [];
+    if (runwayLooks && runwayLooks.length > 0) {
+      presetLooks = runwayLooks.slice(0, 3).map(look => ({
+        designer: look.designer,
+        season: look.season,
+        look_number: look.look_number,
+        image_url: look.image_url,
+        source_url: sourceUrl || '',
+        instagram_handle: look.designer.toLowerCase().replace(/[^a-z0-9]/g, ''),
+        note: 'Curated example.',
+        tags: ['EXAMPLE']
+      }));
+    } else {
+      presetLooks = fallbackLooks;
+    }
+
+    const looksToInsert = presetLooks.filter(preset => {
+      return !archivedLooks.some(
+        archived => 
+          archived.designer.toLowerCase() === preset.designer.toLowerCase() &&
+          archived.season.toLowerCase() === preset.season.toLowerCase() &&
+          archived.look_number === preset.look_number
+      );
+    });
+
+    if (looksToInsert.length === 0) {
+      showToast("EXAMPLES ALREADY CURATED", "info");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('archived_looks')
+        .insert(looksToInsert)
+        .select();
+
+      if (!error && data) {
+        setArchivedLooks(prev => {
+          const next = [...prev];
+          data.forEach(item => {
+            if (!next.some(x => x.id === item.id)) {
+              next.unshift({
+                ...item,
+                tags: Array.isArray(item.tags) ? item.tags : [],
+                note: typeof item.note === 'string' ? item.note : ''
+              });
+            }
+          });
+          return next;
+        });
+        showToast("DEMO EXAMPLES CURATED", "success");
+      } else if (error) {
+        console.error("Supabase 批次新增錯誤:", error);
+        showToast("同步雲端失敗", "error");
+      }
+    } catch (err) {
+      console.error("Supabase 批次新增異常:", err);
+      showToast("同步雲端出錯", "error");
+    }
+  };
+
   // 3. 點擊 `[ - REMOVE ]` 從私人策展庫中移除 Look (從 Supabase 刪除)
   const handleRemoveLook = async (look) => {
     const { id, designer, season, look_number } = look;
@@ -641,6 +737,7 @@ function App() {
         onRemoveLook={handleRemoveLook}
         onUpdateTags={handleUpdateLooksTags}
         onUpdateNote={handleUpdateLooksNote}
+        onCurateExamples={handleCurateExamples}
         analyzingIds={analyzingIds}
         
         // V5.3 跨季度時光機屬性

@@ -12,6 +12,7 @@ import React, { useState } from 'react';
  */
 const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCurated }) => {
   const { image_url, look_number, season, designer } = look;
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div 
@@ -26,13 +27,18 @@ const DefrostCard = ({ look, onClick, onCurate, onRemove, isActive, onZoom, isCu
           e.stopPropagation();
           onZoom(look);
         }}
-        className="relative aspect-[2/3] overflow-hidden rounded-none bg-neutral-100 cursor-zoom-in"
+        className={`relative aspect-[2/3] overflow-hidden rounded-none bg-neutral-200 cursor-zoom-in ${
+          !imageLoaded ? 'animate-pulse' : ''
+        }`}
       >
         <img 
           src={image_url} 
           alt={`${designer} - ${season} - Look ${look_number}`}
           loading="lazy"
-          className="defrost-card-img defrost-gpu w-full h-full object-cover rounded-none"
+          onLoad={() => setImageLoaded(true)}
+          className={`defrost-card-img defrost-gpu w-full h-full object-cover rounded-none transition-opacity duration-700 ease-out ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           style={{
             willChange: 'transform'
           }}

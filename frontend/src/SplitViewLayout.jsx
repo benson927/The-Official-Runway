@@ -55,11 +55,29 @@ const SplitViewLayout = ({
   onRemoveLook,
   onUpdateTags,
   onUpdateNote,
+  onCurateExamples, // ✦ V8.4 一鍵載入策展範例
   analyzingIds = new Set(),
   showToast
 }) => {
   const [designerInput, setDesignerInput] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   
+  // ✦ V8.4 搜尋聯想時裝屋清單
+  const FASHION_HOUSES = [
+    "BALENCIAGA", "MIU MIU", "KIKO KOSTADINOV", "MAISON MARGIELA", 
+    "ACNE STUDIOS", "PRADA", "LOEWE", "RICK OWENS", "CHANEL", 
+    "GUCCI", "DIOR", "BOTTEGA VENETA", "JIL SANDER", "OUR LEGACY", 
+    "YOHJI YAMAMOTO", "COMME DES GARCONS", "HELMUT LANG", "RAF SIMONS"
+  ];
+
+  const searchSuggestions = designerInput.trim()
+    ? FASHION_HOUSES.filter(
+        house => 
+          house.includes(designerInput.toUpperCase()) && 
+          house !== designerInput.toUpperCase()
+      )
+    : [];
+
   // V7.2 全局切換器視角與極速過渡狀態
   const [activeView, setActiveView] = useState('runway');
   
@@ -540,18 +558,40 @@ const SplitViewLayout = ({
               </div>
 
               {/* 微縮無底線搜尋與創建按鈕 */}
-              <form onSubmit={handleSearchSubmit} className="flex items-center gap-1">
+              <form onSubmit={handleSearchSubmit} className="flex items-center gap-1 relative">
                 <div className="relative flex items-center">
                   <input 
                     type="text" 
                     value={designerInput}
                     onChange={(e) => setDesignerInput(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
                     placeholder="SEARCH DESIGNER ARCHIVE" 
                     className="bg-transparent text-neutral-950 font-mono text-[11px] font-bold tracking-[0.15em] placeholder-neutral-400 focus:outline-none w-40 uppercase text-right"
                     disabled={runwayLoading}
                   />
                   <span className="search-cursor font-mono text-[11px] font-bold text-neutral-900 ml-0.5">_</span>
                 </div>
+
+                {/* ✦ V8.4 Autocomplete 聯想下拉選單 */}
+                {isSearchFocused && searchSuggestions.length > 0 && (
+                  <div className="absolute right-0 top-full mt-2 bg-white border border-neutral-900/10 text-neutral-950 font-mono text-[10px] w-48 shadow-2xl z-50 rounded-none text-left py-1 select-none backdrop-blur-md bg-white/95">
+                    {searchSuggestions.map(s => (
+                      <div 
+                        key={s}
+                        onMouseDown={() => {
+                          setDesignerInput(s);
+                          onFetchRunway(s);
+                          setDesignerInput('');
+                          setIsSearchFocused(false);
+                        }}
+                        className="px-3 py-2 hover:bg-neutral-950 hover:text-white cursor-pointer transition-colors duration-150 tracking-widest uppercase font-bold"
+                      >
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 
                 <button 
                   type="submit"
@@ -742,6 +782,7 @@ const SplitViewLayout = ({
               onRemoveLook={onRemoveLook} 
               onUpdateTags={onUpdateTags}
               onUpdateNote={onUpdateNote}
+              onCurateExamples={onCurateExamples}
               analyzingIds={analyzingIds}
               activeView={activeView}
             />

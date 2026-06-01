@@ -19,6 +19,7 @@ const VaultCard = ({
 }) => {
   const { image_url, look_number, season, designer, tags = [] } = look;
   const displayTags = tags.filter(tag => !tag.startsWith('✦'));
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [localNote, setLocalNote] = useState(look.note || '');
   const [isFocused, setIsFocused] = useState(false);
@@ -87,12 +88,17 @@ const VaultCard = ({
     <div className="break-inside-avoid relative group rounded-none overflow-hidden border-none bg-transparent transition-all duration-500 transform hover:scale-[1.01]">
       
       {/* 🟢 圖片展示與取消收藏遮罩區 (直角設計) */}
-      <div className="relative overflow-hidden aspect-auto bg-neutral-100 rounded-none">
+      <div className={`relative overflow-hidden aspect-auto bg-neutral-200 rounded-none ${
+        !imageLoaded ? 'animate-pulse' : ''
+      }`}>
         <img 
           src={image_url} 
           alt={`${designer} - Look ${look_number}`}
           loading="lazy"
-          className="w-full h-auto object-cover grayscale-[30%] opacity-90 transition-all duration-500 transform scale-100 group-hover:scale-102 group-hover:grayscale-0 group-hover:opacity-100 defrost-gpu rounded-none"
+          onLoad={() => setImageLoaded(true)}
+          className={`w-full h-auto object-cover grayscale-[30%] transition-all duration-700 transform scale-100 group-hover:scale-102 group-hover:grayscale-0 defrost-gpu rounded-none ${
+            imageLoaded ? 'opacity-90 group-hover:opacity-100' : 'opacity-0'
+          }`}
         />
 
         {/* 絕對定位的取消收藏覆蓋層 */}

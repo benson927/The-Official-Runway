@@ -16,6 +16,7 @@ const VaultBoard = ({
   onRemoveLook, 
   onUpdateTags, 
   onUpdateNote, 
+  onCurateExamples, // ✦ V8.4 一鍵載入策展範例
   analyzingIds = new Set(),
   activeView = 'runway'
 }) => {
@@ -62,9 +63,15 @@ const VaultBoard = ({
               THE CURATOR'S VAULT
             </span>
             <div className="w-8 h-[1px] bg-neutral-200"></div>
-            <p className="font-sans text-[9px] font-bold text-neutral-400 tracking-[0.25em] uppercase leading-relaxed">
+            <p className="font-sans text-[9px] font-bold text-neutral-400 tracking-[0.25em] uppercase leading-relaxed max-w-xs mx-auto">
               NO ARCHIVED LOOKS. BROWSE THE RUNWAY TO CURATE YOUR PERSONAL MOODBOARD.
             </p>
+            <button
+              onClick={onCurateExamples}
+              className="mt-4 px-6 py-2.5 bg-neutral-950 text-white font-sans text-[10px] font-black tracking-[0.25em] uppercase rounded-none border border-neutral-950 hover:bg-transparent hover:text-neutral-950 active:scale-95 transition-all duration-300 cursor-pointer select-none"
+            >
+              [ CURATE EXAMPLES ]
+            </button>
           </div>
         </div>
       ) : (
