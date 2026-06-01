@@ -16,6 +16,13 @@
 *   **PDF 列印註腳同步**：在 `VaultBoard.jsx` 點擊 `[ EXPORT BOOK ]` 生成的高解析度時裝提案畫冊 HTML 與 PDF 列印頁面中，將原有的 Disclaimer 註腳補充更新為 `THE SILENT ARCHIVE WORKSTATION DEVELOPED BY BENSON // FOR PERSONAL / INTERNAL EDITORIAL PRESENTATION ONLY // IMAGES COPYRIGHT BY GORUNWAY & VOGUE RUNWAY`。
 *   **合規防護**：保證在導出高解析度排版提案畫冊時，能維護 Vogue Runway / GoRunway 的圖像著作權，同時明確表明本工作站系統為 Benson 獨立開發的非商業個人學術研究成果。
 
+## 🎥 系統演示錄影 (System Demo Video)
+
+為了完整展現 `THE SILENT ARCHIVE` 工作站的所有功能亮點與高奢暗黑美學，本專案包含了一段由開發者 **Benson** 本人親自錄製的操作演示影片：
+
+*   **官方演示錄影檔案**：[Runway_record_show.mov](file:///Users/bensonhong/Desktop/Antigravity專案/Runway(行動平台期末個人)/Runway_record_show.mov)
+    *   *演示內容*：完整示範系統的蒙太奇密碼閘門解鎖、Benson 開發者副標示與註腳、一鍵 Noir 暗黑模式平滑切換、Runway 秀場大圖暗房顯影、60fps 滑鼠物理推擠與 Margelia Spec 特刊脈搏，以及金庫卡片策展、拖拽重新排列與 HTML 提案畫冊導出全流程。
+
 ---
 
 # COP.VISION 系統優化更新紀錄 (V7.5)
