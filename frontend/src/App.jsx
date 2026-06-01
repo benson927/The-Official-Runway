@@ -136,6 +136,23 @@ function App() {
             tags: Array.isArray(item.tags) ? item.tags : [],
             note: typeof item.note === 'string' ? item.note : ''
           }));
+          
+          // ✦ V8.6 載入排序自癒：依據本地記憶的拖拽順序排序，新 Look 自動置頂
+          const savedOrder = localStorage.getItem('silent_archive_looks_order');
+          if (savedOrder) {
+            const orderIds = JSON.parse(savedOrder);
+            parsed.sort((a, b) => {
+              const indexA = orderIds.indexOf(a.id);
+              const indexB = orderIds.indexOf(b.id);
+              if (indexA === -1 && indexB === -1) {
+                return new Date(b.created_at) - new Date(a.created_at);
+              }
+              if (indexA === -1) return -1;
+              if (indexB === -1) return 1;
+              return indexA - indexB;
+            });
+          }
+          
           setArchivedLooks(parsed);
         } else if (error) {
           console.error("Supabase 讀取錯誤:", error);
@@ -642,6 +659,13 @@ function App() {
     }
   };
 
+  // ✦ V8.6 重新排序時裝情緒板 Looks 並持久化
+  const handleReorderLooks = (newOrderedLooks) => {
+    setArchivedLooks(newOrderedLooks);
+    const orderedIds = newOrderedLooks.map(look => look.id).filter(Boolean);
+    localStorage.setItem('silent_archive_looks_order', JSON.stringify(orderedIds));
+  };
+
   // 4. 更新 Look 的自訂標籤 (V6.1 支援以 UUID 或複合屬性非同步更新)
   const handleUpdateLooksTags = async (idOrDesigner, seasonOrTags, lookNumber, maybeTags) => {
     let id = null;
@@ -763,6 +787,7 @@ function App() {
         onUpdateTags={handleUpdateLooksTags}
         onUpdateNote={handleUpdateLooksNote}
         onCurateExamples={handleCurateExamples}
+        onReorderLooks={handleReorderLooks}
         analyzingIds={analyzingIds}
         
         // V5.3 跨季度時光機屬性

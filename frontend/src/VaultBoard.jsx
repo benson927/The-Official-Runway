@@ -17,10 +17,224 @@ const VaultBoard = ({
   onUpdateTags, 
   onUpdateNote, 
   onCurateExamples, // ✦ V8.4 一鍵載入策展範例
+  onReorderLooks,   // ✦ V8.6 拖拽重排回呼
   analyzingIds = new Set(),
   activeView = 'runway'
 }) => {
   const [activeFilterTag, setActiveFilterTag] = useState('ALL');
+  const [draggedIndex, setDraggedIndex] = useState(null);
+
+  // ✦ V8.6 畫冊列印導出 HTML 生成與觸發
+  const handleExportEditorialBook = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert("請允許彈出視窗以匯出時裝畫冊。");
+      return;
+    }
+
+    const looksHtml = filteredLooks.map(look => {
+      const displayTags = (look.tags || []).filter(t => !t.startsWith('✦')).map(t => `#${t}`).join(' ');
+      const noteHtml = look.note ? `<p class="note">${look.note}</p>` : '';
+      return `
+        <div class="look-card">
+          <div class="image-wrapper">
+            <img src="${look.image_url}" alt="時裝 Look" />
+          </div>
+          <div class="meta">
+            <div class="row">
+              <span class="designer">${look.designer.replace(/-/g, ' ').toUpperCase()}</span>
+              <span class="look-num">LOOK ${look.look_number}</span>
+            </div>
+            <div class="season">${look.season.toUpperCase()}</div>
+            ${displayTags ? `<div class="tags">${displayTags}</div>` : ''}
+            ${noteHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>THE SILENT ARCHIVE // EDITORIAL BOOK</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+        <style>
+          body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            margin: 0;
+            padding: 40px;
+            -webkit-print-color-adjust: exact;
+          }
+          header {
+            border-bottom: 2px solid #000000;
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+          }
+          header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            margin: 0;
+            text-transform: uppercase;
+          }
+          header .subtitle {
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.3em;
+            color: #666;
+            text-transform: uppercase;
+            padding-bottom: 4px;
+          }
+          .gallery {
+            display: grid;
+            grid-template-cols: repeat(2, 1fr);
+            gap: 40px;
+          }
+          .look-card {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-bottom: 1px dashed #e0e0e0;
+            padding-bottom: 20px;
+          }
+          .image-wrapper {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background-color: #f5f5f5;
+            overflow: hidden;
+          }
+          .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          .meta {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+          }
+          .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .designer {
+            font-family: 'Playfair Display', serif;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+          }
+          .look-num {
+            font-size: 11px;
+            font-weight: 900;
+            color: #444;
+            letter-spacing: 0.05em;
+          }
+          .season {
+            font-size: 9px;
+            font-weight: 900;
+            color: #999;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+          }
+          .tags {
+            font-size: 9px;
+            font-weight: 900;
+            color: #888;
+            letter-spacing: 0.1em;
+            margin-top: 2px;
+          }
+          .note {
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            font-style: italic;
+            color: #555;
+            margin: 6px 0 0 0;
+            line-height: 1.4;
+          }
+          @media print {
+            body {
+              padding: 20px;
+            }
+            .look-card {
+              border-bottom: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <header>
+          <h1>The Silent Archive</h1>
+          <div class="subtitle">Curated Lookbook // ${filteredLooks.length} Specimen</div>
+        </header>
+        <div class="gallery">
+          ${looksHtml}
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  // ✦ V8.6 HTML5 拖拽事件處理
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, overIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === overIndex) return;
+
+    const newFiltered = [...filteredLooks];
+    const draggedLook = newFiltered[draggedIndex];
+    
+    // 1. 在過濾列表中重新定位
+    newFiltered.splice(draggedIndex, 1);
+    newFiltered.splice(overIndex, 0, draggedLook);
+
+    // 2. 將變更同步回原始 master 列表，非過濾項目位置保持不變
+    const newFullList = [];
+    let filteredPtr = 0;
+    
+    archivedLooks.forEach(item => {
+      const isMatched = activeFilterTag === 'ALL' || (item.tags && item.tags.includes(activeFilterTag));
+      if (isMatched) {
+        newFullList.push(newFiltered[filteredPtr]);
+        filteredPtr++;
+      } else {
+        newFullList.push(item);
+      }
+    });
+
+    onReorderLooks && onReorderLooks(newFullList);
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   // 1. 動態提取所有已收藏 Look 中的不重複標籤列表，進行字母排序 (過濾掉以 ✦ 開頭的 AI 標籤)
   const allUsedTags = Array.from(
@@ -80,9 +294,9 @@ const VaultBoard = ({
           <div className="max-w-7xl mx-auto px-6">
             
 
-            {/* 🏷️ V5.2 頂部全局過濾器 (Tag Filter Bar) - 橫向滾動 */}
-            {allUsedTags.length > 0 && (
-              <div className="flex items-center gap-6 overflow-x-auto pb-4 mb-8 custom-scrollbar border-b border-neutral-50 select-none">
+            {/* 🏷️ V5.2 頂部全局過濾器 (Tag Filter Bar) 與 V8.6 畫冊導出按鈕 */}
+            <div className="flex items-center justify-between pb-4 mb-8 border-b border-neutral-200/20 select-none">
+              <div className="flex items-center gap-6 overflow-x-auto custom-scrollbar">
                 {/* ALL 預設全局按鈕 */}
                 <button
                   onClick={() => setActiveFilterTag('ALL')}
@@ -110,7 +324,15 @@ const VaultBoard = ({
                   </button>
                 ))}
               </div>
-            )}
+
+              <button
+                onClick={handleExportEditorialBook}
+                className="font-sans text-[9px] font-black tracking-[0.25em] uppercase text-neutral-400 hover:text-neutral-950 transition-all duration-300 pb-1 cursor-pointer shrink-0 border-none bg-transparent"
+                title="EXPORT EDITORIAL LOOKBOOK"
+              >
+                [ EXPORT BOOK ]
+              </button>
+            </div>
 
             {/* 滿版 3-4 欄網格 - 從左到右 1-4 依序排列 (動態 keyed 以在載入/切換時觸發暗房顯影動畫) */}
             <div 
@@ -122,11 +344,18 @@ const VaultBoard = ({
                 return (
                   <div 
                     key={look.id || uniqueKey} 
-                    className="animate-darkroom-reveal transition-all duration-300"
+                    className={`animate-darkroom-reveal transition-all duration-300 ${
+                      draggedIndex === index ? 'opacity-30 scale-95' : ''
+                    }`}
                     style={{
                       animationDelay: `${index * 30}ms`,
                       animationFillMode: 'both'
                     }}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
                   >
                     <VaultCard 
                       look={look}

@@ -56,6 +56,7 @@ const SplitViewLayout = ({
   onUpdateTags,
   onUpdateNote,
   onCurateExamples, // ✦ V8.4 一鍵載入策展範例
+  onReorderLooks,   // ✦ V8.6 拖拽重排回呼
   analyzingIds = new Set(),
   showToast
 }) => {
@@ -783,6 +784,7 @@ const SplitViewLayout = ({
               onUpdateTags={onUpdateTags}
               onUpdateNote={onUpdateNote}
               onCurateExamples={onCurateExamples}
+              onReorderLooks={onReorderLooks}
               analyzingIds={analyzingIds}
               activeView={activeView}
             />
