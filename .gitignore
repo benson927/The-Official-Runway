@@ -32,3 +32,6 @@ yarn-error.log*
 # 5. 作業系統雜訊 (OS Noise)
 .DS_Store
 Thumbs.db
+
+# 6. 本地專屬筆記 (Local Startup Note)
+start_note.md
