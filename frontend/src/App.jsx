@@ -183,7 +183,7 @@ function App() {
     };
   }, []);
 
-  // ⏳ 從 Supabase 載入品牌快捷列 (Shortcuts) 並與本地同步，出錯時安全降級
+  // ⏳ 從 Supabase 載入品牌快捷列 (Shortcuts) 並與本地同步，出錯時安全降級 (V8.5 - 強化本地防禦，防範 RLS 覆蓋)
   useEffect(() => {
     const fetchShortcuts = async () => {
       try {
@@ -193,27 +193,52 @@ function App() {
           .order('created_at', { ascending: true });
         
         if (!error && data) {
-          let loaded = data;
-          if (data.length === 0) {
-            const defaultShortcuts = [
-              { label: 'KIKO KOSTADINOV', value: 'kiko-kostadinov' },
-              { label: 'ACNE STUDIOS', value: 'acne-studios' },
-              { label: 'MAISON MARGIELA', value: 'maison-margiela' }
-            ];
-            const { data: inserted, error: insertErr } = await supabase
-              .from('shortcuts')
-              .insert(defaultShortcuts)
-              .select();
-            if (!insertErr && inserted) {
-              loaded = inserted;
+          if (data.length > 0) {
+            // 1. 雲端有資料，以雲端為準同步至本地
+            setShortcuts(data);
+          } else {
+            // 2. 雲端無資料（可能是新資料庫，或受到 RLS 限制返回空列表）
+            // 讀取本地儲存作為防禦備份，避免直接覆蓋清空使用者的自訂 Pin 品牌
+            const localSaved = localStorage.getItem('silent_archive_shortcuts');
+            const localParsed = localSaved ? JSON.parse(localSaved) : [];
+            
+            if (localParsed.length > 0) {
+              // 嘗試將本地自訂資料備份上雲端
+              const { error: syncErr } = await supabase
+                .from('shortcuts')
+                .insert(localParsed);
+              if (syncErr) {
+                console.warn("⚠️ [SHORTCUTS] 同步本地品牌至雲端失敗 (可能受到 RLS 限制):", syncErr.message);
+              }
+              setShortcuts(localParsed);
+            } else {
+              // 若本地也無資料，則寫入預設的三大品牌
+              const defaultShortcuts = [
+                { label: 'KIKO KOSTADINOV', value: 'kiko-kostadinov' },
+                { label: 'ACNE STUDIOS', value: 'acne-studios' },
+                { label: 'MAISON MARGIELA', value: 'maison-margiela' }
+              ];
+              const { data: inserted, error: insertErr } = await supabase
+                .from('shortcuts')
+                .insert(defaultShortcuts)
+                .select();
+              
+              if (!insertErr && inserted) {
+                setShortcuts(inserted);
+              } else {
+                setShortcuts(defaultShortcuts);
+              }
             }
           }
-          setShortcuts(loaded);
         } else if (error) {
-          console.warn("⚠️ [SHORTCUTS] 雲端品牌快捷表不存在，已降級使用本地緩存:", error.message);
+          console.warn("⚠️ [SHORTCUTS] 雲端品牌讀取失敗，降級使用本地快取:", error.message);
+          const saved = localStorage.getItem('silent_archive_shortcuts');
+          if (saved) setShortcuts(JSON.parse(saved));
         }
       } catch (err) {
-        console.warn("⚠️ [SHORTCUTS] 雲端品牌載入異常，降級使用本地緩存:", err);
+        console.warn("⚠️ [SHORTCUTS] 雲端品牌載入異常，降級使用本地快取:", err);
+        const saved = localStorage.getItem('silent_archive_shortcuts');
+        if (saved) setShortcuts(JSON.parse(saved));
       }
     };
     fetchShortcuts();
