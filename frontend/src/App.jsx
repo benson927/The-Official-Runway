@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import SplitViewLayout from './SplitViewLayout';
@@ -8,8 +8,8 @@ import { supabase } from './utils/supabaseClient';
 
 gsap.registerPlugin(useGSAP);
 
-// 後端 API 基礎路徑 (Flask 運行於 Port 5001 - 用於左屏抓取)
-const BASE_URL = 'http://127.0.0.1:5001/api';
+// 後端 API 基礎路徑，可用 VITE_API_BASE_URL 覆蓋，預設連到本機 Flask。
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5001/api').replace(/\/$/, '');
 
 /**
  * App — 私人策展庫頂層狀態橋接器 (V5.1 - The Curator's Vault)
@@ -25,7 +25,7 @@ function App() {
   const [isNoirMode, setIsNoirMode] = useState(() => {
     try {
       return localStorage.getItem('silent_archive_noir_mode') === 'true';
-    } catch (e) {
+    } catch {
       return false;
     }
   });
@@ -79,7 +79,7 @@ function App() {
   const [isUnlocked, setIsUnlocked] = useState(() => {
     try {
       return sessionStorage.getItem('vault_unlocked') === 'true';
-    } catch (e) {
+    } catch {
       return false;
     }
   });
@@ -141,7 +141,7 @@ function App() {
   const [archivedLooks, setArchivedLooks] = useState([]);
 
   // V7.0 Oracle Vision AI 正在解析中的 Look ID 集合
-  const [analyzingIds, setAnalyzingIds] = useState(new Set());
+  const [analyzingIds] = useState(new Set());
 
   // ⏳ 從 Supabase 雲端資料庫拉取收藏的 Looks，並啟動實時訂閱
   useEffect(() => {
@@ -283,20 +283,18 @@ function App() {
     fetchShortcuts();
   }, []);
 
-  // ✦ 初始化載入第一個快捷推薦品牌（優先使用快取/預設第一項）
-  useEffect(() => {
-    const initialDesigner = shortcuts.length > 0 ? shortcuts[0].value : 'maison-margiela';
-    fetchRunwayLooks(initialDesigner);
+  // 全局 Toast 提示調度
+  const showToast = useCallback((message, type = 'info') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
   }, []);
-
-
 
   // ==========================================
   // 左半屏 Runway 秀場異步加載
   // ==========================================
 
   // 1. [RUNWAY API] 獲取 Vogue Runway 秀場 Looks
-  const fetchRunwayLooks = async (designerName, targetSeason = null) => {
+  const fetchRunwayLooks = useCallback(async (designerName, targetSeason = null) => {
     if (!designerName.trim()) return;
     
     // ⏳ 觸發 GPU 硬件加速的 300ms 淡出過渡
@@ -352,7 +350,18 @@ function App() {
     } finally {
       setRunwayLoading(false);
     }
-  };
+  }, [isUnlocked, showToast]);
+
+  // ✦ 初始化載入第一個快捷推薦品牌（優先使用快取/預設第一項）
+  const hasFetchedInitialRunway = useRef(false);
+  useEffect(() => {
+    if (hasFetchedInitialRunway.current) return;
+    hasFetchedInitialRunway.current = true;
+    const initialDesigner = shortcuts.length > 0 ? shortcuts[0].value : 'maison-margiela';
+    queueMicrotask(() => {
+      fetchRunwayLooks(initialDesigner);
+    });
+  }, [fetchRunwayLooks, shortcuts]);
 
   // 季度時光機切換回呼
   const handleSelectSeason = (seasonName) => {
@@ -415,83 +424,6 @@ function App() {
   // 品牌快捷列重新排序
   const handleReorderShortcuts = (newShortcuts) => {
     setShortcuts(newShortcuts);
-  };
-
-  // ==========================================
-  // V7.0 Oracle Vision AI 視覺引擎分析
-  // ==========================================
-  const triggerOracleAnalysis = async (insertedLook) => {
-    if (!insertedLook || !insertedLook.id) return;
-    
-    // 1. 將該 ID 加到解析中集合
-    setAnalyzingIds(prev => {
-      const next = new Set(prev);
-      next.add(insertedLook.id);
-      return next;
-    });
-    
-    try {
-      console.log(`🤖 [ORACLE] 啟動 AI 視覺分析: ${insertedLook.id}`);
-      
-      const response = await fetch('http://127.0.0.1:5001/api/oracle-analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ image_url: insertedLook.image_url })
-      });
-      
-      if (response.ok) {
-        const resData = await response.json();
-        const rawTags = resData.tags || [];
-        
-        // 格式化 AI 標籤：全大寫、去 #、加上 ✦ 前綴
-        const aiTags = rawTags.map(tag => {
-          const clean = tag.replace(/^#/, '').trim().toUpperCase().replace(/\s+/g, '_');
-          return `✦${clean}`;
-        });
-        
-        if (aiTags.length > 0) {
-          // 獲取最新狀態，防範使用者在此期間自己手動新增了標籤
-          setArchivedLooks(prev => {
-            const currentLook = prev.find(item => item.id === insertedLook.id);
-            if (!currentLook) return prev;
-            
-            // 併入 AI 標籤 (去重)
-            const existingTags = currentLook.tags || [];
-            const mergedTags = Array.from(new Set([...existingTags, ...aiTags]));
-            
-            // 非同步發送 Supabase 更新
-            supabase
-              .from('archived_looks')
-              .update({ tags: mergedTags })
-              .eq('id', insertedLook.id)
-              .then(({ error }) => {
-                if (error) {
-                  console.error("Supabase 更新 AI 標籤失敗:", error);
-                } else {
-                  console.log("Supabase 雲端 AI 標籤附加同步完成!");
-                }
-              });
-              
-            return prev.map(item => item.id === insertedLook.id ? { ...item, tags: mergedTags } : item);
-          });
-          
-          showToast("ORACLE FASHION ANALYSIS COMPLETE", "success");
-        }
-      } else {
-        console.error("Oracle API 回傳異常");
-      }
-    } catch (err) {
-      console.error("Oracle 視覺解析異步執行出錯:", err);
-    } finally {
-      // 3. 自解析中集合移除該 ID
-      setAnalyzingIds(prev => {
-        const next = new Set(prev);
-        next.delete(insertedLook.id);
-        return next;
-      });
-    }
   };
 
   // ==========================================
@@ -584,9 +516,8 @@ function App() {
       }
     ];
 
-    let presetLooks = [];
-    if (runwayLooks && runwayLooks.length > 0) {
-      presetLooks = runwayLooks.slice(0, 3).map(look => ({
+    const presetLooks = runwayLooks && runwayLooks.length > 0
+      ? runwayLooks.slice(0, 3).map(look => ({
         designer: look.designer,
         season: look.season,
         look_number: look.look_number,
@@ -595,10 +526,8 @@ function App() {
         instagram_handle: look.designer.toLowerCase().replace(/[^a-z0-9]/g, ''),
         note: 'Curated example.',
         tags: ['EXAMPLE']
-      }));
-    } else {
-      presetLooks = fallbackLooks;
-    }
+      }))
+      : fallbackLooks;
 
     const looksToInsert = presetLooks.filter(preset => {
       return !archivedLooks.some(
@@ -774,17 +703,6 @@ function App() {
     } catch (err) {
       console.error("Supabase 更新筆記異常:", err);
     }
-  };
-
-  // ==========================================
-  // 初始化與生命週期
-  // ==========================================
-
-
-  // 全局 Toast 提示調度
-  const showToast = (message, type = 'info') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
   };
 
   return (

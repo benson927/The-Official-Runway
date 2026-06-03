@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import VaultCard from './VaultCard';
 
 /**
@@ -237,7 +237,7 @@ const VaultBoard = ({
     let filteredPtr = 0;
     
     archivedLooks.forEach(item => {
-      const isMatched = activeFilterTag === 'ALL' || (item.tags && item.tags.includes(activeFilterTag));
+      const isMatched = effectiveFilterTag === 'ALL' || (item.tags && item.tags.includes(effectiveFilterTag));
       if (isMatched) {
         newFullList.push(newFiltered[filteredPtr]);
         filteredPtr++;
@@ -255,24 +255,23 @@ const VaultBoard = ({
   };
 
   // 1. 動態提取所有已收藏 Look 中的不重複標籤列表，進行字母排序 (過濾掉以 ✦ 開頭的 AI 標籤)
-  const allUsedTags = Array.from(
+  const allUsedTags = useMemo(() => Array.from(
     new Set(
       archivedLooks
         .flatMap(look => look.tags || [])
         .filter(tag => !tag.startsWith('✦'))
     )
-  ).sort();
+  ).sort(), [archivedLooks]);
 
-  // 1.5. 安全守護：如果當前選中的過濾標籤在所有已使用的標籤列表中消失了，則自動回退重置為 'ALL'
-  useEffect(() => {
-    if (activeFilterTag !== 'ALL' && !allUsedTags.includes(activeFilterTag)) {
-      setActiveFilterTag('ALL');
-    }
-  }, [allUsedTags, activeFilterTag]);
+  // 如果目前選中的標籤被移除，渲染時直接回退到 ALL，避免額外 effect 觸發二次 render。
+  const effectiveFilterTag =
+    activeFilterTag !== 'ALL' && !allUsedTags.includes(activeFilterTag)
+      ? 'ALL'
+      : activeFilterTag;
 
   // 2. 點擊頂部標籤過濾器 (切換或重置)
   const handleTagClick = (tag) => {
-    if (activeFilterTag === tag) {
+    if (effectiveFilterTag === tag) {
       setActiveFilterTag('ALL'); // 再次點擊已選中的，重置回 ALL
     } else {
       setActiveFilterTag(tag);
@@ -280,9 +279,9 @@ const VaultBoard = ({
   };
 
   // 3. 根據選中標籤，對情緒板進行數據瞬間篩選過濾
-  const filteredLooks = activeFilterTag === 'ALL'
+  const filteredLooks = effectiveFilterTag === 'ALL'
     ? archivedLooks
-    : archivedLooks.filter(look => look.tags && look.tags.includes(activeFilterTag));
+    : archivedLooks.filter(look => look.tags && look.tags.includes(effectiveFilterTag));
 
   return (
     <div className="w-full h-full flex flex-col bg-white dark:bg-[#121212] transition-colors duration-500">
@@ -319,7 +318,7 @@ const VaultBoard = ({
                 <button
                   onClick={() => setActiveFilterTag('ALL')}
                   className={`font-sans text-[9px] font-black tracking-[0.25em] uppercase transition-all duration-300 pb-1 cursor-pointer ${
-                    activeFilterTag === 'ALL'
+                    effectiveFilterTag === 'ALL'
                       ? 'text-neutral-900 dark:text-[#F5F5F5] border-b-2 border-neutral-900 dark:border-[#F5F5F5] font-bold'
                       : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-[#F5F5F5]'
                   }`}
@@ -333,7 +332,7 @@ const VaultBoard = ({
                     key={tag}
                     onClick={() => handleTagClick(tag)}
                     className={`font-sans text-[9px] font-black tracking-[0.25em] uppercase transition-all duration-300 pb-1 cursor-pointer flex items-center gap-0.5 ${
-                      activeFilterTag === tag
+                    effectiveFilterTag === tag
                         ? 'text-neutral-900 dark:text-[#F5F5F5] border-b-2 border-neutral-900 dark:border-[#F5F5F5] font-bold'
                         : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-[#F5F5F5]'
                     }`}
@@ -395,7 +394,7 @@ const VaultBoard = ({
                   EMPTY FILTER
                 </span>
                 <p className="font-sans text-[9px] font-bold text-neutral-400 dark:text-neutral-500 tracking-[0.2em] uppercase leading-relaxed max-w-xs mx-auto">
-                  No curated looks matching tag #{activeFilterTag}. Click another tag to reveal other inspiration archives.
+                  No curated looks matching tag #{effectiveFilterTag}. Click another tag to reveal other inspiration archives.
                 </p>
               </div>
             )}

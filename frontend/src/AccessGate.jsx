@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
@@ -19,13 +19,21 @@ const UNIQUE_MONTAGE_IMAGES = [
 ];
 
 // 為了實現持續 3.0 秒且維持 120ms 高速閃影，我們將這 10 張獨特圖片以打亂的順序重組為 25 幀的蒙太奇時間軸
-const MONTAGE_IMAGES = [
-  UNIQUE_MONTAGE_IMAGES[0], UNIQUE_MONTAGE_IMAGES[2], UNIQUE_MONTAGE_IMAGES[4], UNIQUE_MONTAGE_IMAGES[6], UNIQUE_MONTAGE_IMAGES[8],
-  UNIQUE_MONTAGE_IMAGES[1], UNIQUE_MONTAGE_IMAGES[3], UNIQUE_MONTAGE_IMAGES[5], UNIQUE_MONTAGE_IMAGES[7], UNIQUE_MONTAGE_IMAGES[9],
-  UNIQUE_MONTAGE_IMAGES[0], UNIQUE_MONTAGE_IMAGES[4], UNIQUE_MONTAGE_IMAGES[1], UNIQUE_MONTAGE_IMAGES[7], UNIQUE_MONTAGE_IMAGES[3],
-  UNIQUE_MONTAGE_IMAGES[8], UNIQUE_MONTAGE_IMAGES[2], UNIQUE_MONTAGE_IMAGES[6], UNIQUE_MONTAGE_IMAGES[5], UNIQUE_MONTAGE_IMAGES[9],
-  UNIQUE_MONTAGE_IMAGES[1], UNIQUE_MONTAGE_IMAGES[4], UNIQUE_MONTAGE_IMAGES[7], UNIQUE_MONTAGE_IMAGES[0], UNIQUE_MONTAGE_IMAGES[8]
-];
+const createShuffledMontage = () => {
+  const shuffleArray = (array) => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  const shuffled1 = shuffleArray(UNIQUE_MONTAGE_IMAGES);
+  const shuffled2 = shuffleArray(UNIQUE_MONTAGE_IMAGES);
+  const shuffled3 = shuffleArray(UNIQUE_MONTAGE_IMAGES).slice(0, 5);
+  return [...shuffled1, ...shuffled2, ...shuffled3];
+};
 
 /**
  * AccessGate — 蒙太奇金庫門禁系統 (V5.9.2)
@@ -39,7 +47,7 @@ const MONTAGE_IMAGES = [
  */
 const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
 
-  const [montageImages, setMontageImages] = useState(MONTAGE_IMAGES);
+  const [montageImages] = useState(createShuffledMontage);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMontageActive, setIsMontageActive] = useState(true);
   const [passcodeInput, setPasscodeInput] = useState('');
@@ -77,23 +85,6 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
   useEffect(() => {
     if (isUnlocked) return;
     
-    // Fisher-Yates Shuffle 演算法
-    const shuffleArray = (array) => {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    };
-
-    const shuffled1 = shuffleArray(UNIQUE_MONTAGE_IMAGES);
-    const shuffled2 = shuffleArray(UNIQUE_MONTAGE_IMAGES);
-    const shuffled3 = shuffleArray(UNIQUE_MONTAGE_IMAGES).slice(0, 5);
-    const shuffledMontage = [...shuffled1, ...shuffled2, ...shuffled3];
-    
-    setMontageImages(shuffledMontage);
-
     UNIQUE_MONTAGE_IMAGES.forEach(url => {
       const img = new Image();
       img.src = url;
@@ -122,7 +113,7 @@ const AccessGate = ({ isUnlocked, setIsUnlocked }) => {
       clearInterval(montageTimer);
       clearTimeout(transitionTimer);
     };
-  }, [isUnlocked, isMontageActive]);
+  }, [isUnlocked, isMontageActive, montageImages.length]);
 
   // 3. 處理密碼輸入實時比對
   const handlePasscodeChange = (e) => {

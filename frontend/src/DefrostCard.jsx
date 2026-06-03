@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 /**
  * DefrostCard — 時裝秀場直角無界卡片組件 (V7.4 - The Immersive Gallery)

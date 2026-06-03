@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * ImmersiveZoom — 沉浸式布料細節放大鏡模態窗元件 (V5.8)
@@ -70,7 +70,7 @@ const ImmersiveZoom = ({ look, onClose, onCurate, isAlreadyCurated, videoUrl }) 
   const getYouTubeEmbedUrl = (url) => {
     if (!url) return '';
     let videoId = '';
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     if (match && match[2].length === 11) {
       videoId = match[2];

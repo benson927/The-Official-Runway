@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { Fragment, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
@@ -503,7 +503,7 @@ const SplitViewLayout = ({
           ref={containerRef}
           className="absolute inset-0 pt-24 overflow-y-auto custom-scrollbar defrost-gpu"
           style={{
-            opacity: activeView === 'runway' ? 1 : 0,
+            opacity: activeView === 'runway' ? (runwayFading ? 0.35 : 1) : 0,
             pointerEvents: activeView === 'runway' ? 'auto' : 'none',
             visibility: activeView === 'runway' ? 'visible' : 'hidden',
             transition: 'opacity 300ms ease-in-out, visibility 300ms ease-in-out'
@@ -525,7 +525,7 @@ const SplitViewLayout = ({
                 {shortcuts.map((d, index) => {
                   const isActive = currentDesigner === d.value;
                   return (
-                    <React.Fragment key={d.value}>
+                    <Fragment key={d.value}>
                       {index > 0 && <span className="text-neutral-200 dark:text-neutral-800 select-none">.</span>}
                       <div 
                         draggable="true"
@@ -536,7 +536,7 @@ const SplitViewLayout = ({
                           index === draggedIndex 
                             ? 'opacity-30 cursor-grabbing' 
                             : 'cursor-grab'
-                        }`}
+                        } ${deletingShortcuts.includes(d.value) ? 'opacity-0 scale-95' : ''}`}
                       >
                         <button
                           onClick={() => onFetchRunway(d.value)}
@@ -554,7 +554,7 @@ const SplitViewLayout = ({
                           ×
                         </span>
                       </div>
-                    </React.Fragment>
+                    </Fragment>
                   );
                 })}
 
@@ -721,7 +721,7 @@ const SplitViewLayout = ({
                   key={`${currentDesigner}-${currentSeason}-${activeView}`} 
                   className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-16 gap-y-20"
                 >
-                  {runwayLooks.map((look, index) => {
+                  {runwayLooks.map((look) => {
                     const isCurated = archivedLooks.some(
                       item => 
                         item.designer.toLowerCase() === currentDesigner.toLowerCase() &&

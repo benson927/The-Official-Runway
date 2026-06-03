@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 /**
  * VaultCard — 收藏圖卡組件 (V7.4 - The Immersive Gallery)
@@ -21,20 +21,15 @@ const VaultCard = ({
   const displayTags = tags.filter(tag => !tag.startsWith('✦'));
   const [imageLoaded, setImageLoaded] = useState(false);
   const [tagInput, setTagInput] = useState('');
-  const [localNote, setLocalNote] = useState(look.note || '');
   const [isFocused, setIsFocused] = useState(false);
 
-  // 監聽 look.note 的外部更新 (例如同步或重置)
-  useEffect(() => {
-    setLocalNote(look.note || '');
-  }, [look.note]);
-
   // 處理失去焦點時寫入頂層 (優先使用 UUID 更新)
-  const handleNoteBlur = () => {
+  const handleNoteBlur = (e) => {
+    const note = e.currentTarget.value;
     if (look.id) {
-      onUpdateNote(look.id, localNote);
+      onUpdateNote(look.id, note);
     } else {
-      onUpdateNote(designer, season, look_number, localNote);
+      onUpdateNote(designer, season, look_number, note);
     }
   };
 
@@ -42,10 +37,11 @@ const VaultCard = ({
   const handleNoteKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      const note = e.currentTarget.value;
       if (look.id) {
-        onUpdateNote(look.id, localNote);
+        onUpdateNote(look.id, note);
       } else {
-        onUpdateNote(designer, season, look_number, localNote);
+        onUpdateNote(designer, season, look_number, note);
       }
       e.currentTarget.blur();
     }
@@ -189,8 +185,7 @@ const VaultCard = ({
         <div className="mt-3 pt-3 border-t border-neutral-900/10 dark:border-neutral-100/10 relative group/note">
           <input
             type="text"
-            value={localNote}
-            onChange={(e) => setLocalNote(e.target.value)}
+            defaultValue={look.note || ''}
             onBlur={handleNoteBlur}
             onKeyDown={handleNoteKeyDown}
             placeholder="ADD NOTE..."

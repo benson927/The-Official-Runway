@@ -8,6 +8,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 import json
+import tempfile
 
 # ==========================================
 # 全局組態設定
@@ -15,8 +16,10 @@ import json
 # 預設快取過期時間：24 小時 (以秒為單位)
 DEFAULT_CACHE_EXPIRY = 24 * 3600
 
-# SQLite 資料庫檔案路徑 (存放在當前 backend 目錄下)
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runway_cache.db")
+# SQLite 資料庫檔案路徑。可用 RUNWAY_CACHE_DB_PATH 覆蓋，方便部署時放到可寫入的位置。
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_DB_PATH = os.path.join(BACKEND_DIR, "runway_cache.db")
+DB_PATH = os.path.abspath(os.environ.get("RUNWAY_CACHE_DB_PATH", DEFAULT_DB_PATH))
 
 # 爬蟲請求使用的瀏覽器 Headers
 HEADERS = {
@@ -29,10 +32,29 @@ HEADERS = {
 
 def get_db_connection():
     """取得資料庫連線，並設定為 WAL 模式以提升併發讀寫效能"""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row  # 允許使用字典方式存取欄位
-    conn.execute("PRAGMA journal_mode=WAL;")
-    return conn
+    db_dir = os.path.dirname(DB_PATH) or "."
+    os.makedirs(db_dir, exist_ok=True)
+
+    db_is_writable = not os.path.exists(DB_PATH) or os.access(DB_PATH, os.W_OK)
+    should_use_fallback = not os.access(db_dir, os.W_OK) or not db_is_writable
+
+    def connect(path):
+        conn = sqlite3.connect(path, timeout=15)
+        conn.row_factory = sqlite3.Row  # 允許使用字典方式存取欄位
+        conn.execute("PRAGMA journal_mode=WAL;")
+        return conn
+
+    if not should_use_fallback:
+        try:
+            return connect(DB_PATH)
+        except sqlite3.OperationalError as err:
+            print(f"[ WARN ]  CACHE DATABASE UNAVAILABLE ({err}), SWITCHING TO TEMP CACHE.")
+
+    fallback_dir = os.path.join(tempfile.gettempdir(), "silent_archive")
+    os.makedirs(fallback_dir, exist_ok=True)
+    fallback_path = os.path.join(fallback_dir, os.path.basename(DB_PATH))
+    print(f"[ WARN ]  USING FALLBACK CACHE DATABASE: {fallback_path}")
+    return connect(fallback_path)
 
 def init_db():
     """
