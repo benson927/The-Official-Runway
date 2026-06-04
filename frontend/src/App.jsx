@@ -46,6 +46,18 @@ function App() {
   // --- 全局 Toast 通知狀態 ---
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const toastRef = useRef(null);
+  const toastTimeoutRef = useRef(null);
+  const runwayAbortRef = useRef(null);
+  const runwayRequestRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+      runwayAbortRef.current?.abort();
+    };
+  }, []);
 
   // ✦ Toast 進退場 GSAP 動畫控制
   useGSAP(() => {
@@ -285,8 +297,15 @@ function App() {
 
   // 全局 Toast 提示調度
   const showToast = useCallback((message, type = 'info') => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
     setToast({ show: true, message, type });
-    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+      toastTimeoutRef.current = null;
+    }, 3000);
   }, []);
 
   // ==========================================
@@ -296,6 +315,12 @@ function App() {
   // 1. [RUNWAY API] 獲取 Vogue Runway 秀場 Looks
   const fetchRunwayLooks = useCallback(async (designerName, targetSeason = null) => {
     if (!designerName.trim()) return;
+
+    runwayAbortRef.current?.abort();
+    const requestId = runwayRequestRef.current + 1;
+    runwayRequestRef.current = requestId;
+    const controller = new AbortController();
+    runwayAbortRef.current = controller;
     
     // ⏳ 觸發 GPU 硬件加速的 300ms 淡出過渡
     setRunwayFading(true);
@@ -311,12 +336,16 @@ function App() {
         url += `&season=${encodeURIComponent(targetSeason)}`;
       }
       
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: controller.signal });
       const data = await res.json();
+
+      if (requestId !== runwayRequestRef.current) return;
       
       if (res.ok) {
         // 先給予淡出動畫 150ms 充分展示時間，隨後更新數據，避免畫面瞬切生硬
         setTimeout(() => {
+          if (requestId !== runwayRequestRef.current) return;
+
           setRunwayLooks(data.looks || []);
           setCurrentDesigner(data.designer || searchSlug);
           setCurrentSeason(data.season || targetSeason || "未知季度");
@@ -332,6 +361,7 @@ function App() {
           
           // 數據更新完成後，以 300ms 流暢淡入
           setTimeout(() => {
+            if (requestId !== runwayRequestRef.current) return;
             setRunwayFading(false);
           }, 50);
         }, 150);
@@ -344,11 +374,14 @@ function App() {
         setRunwayFading(false);
       }
     } catch (error) {
+      if (error.name === 'AbortError') return;
       console.error("Fetch runway error:", error);
       showToast("時裝金庫連線超時", 'error');
       setRunwayFading(false);
     } finally {
-      setRunwayLoading(false);
+      if (requestId === runwayRequestRef.current) {
+        setRunwayLoading(false);
+      }
     }
   }, [isUnlocked, showToast]);
 
@@ -430,6 +463,9 @@ function App() {
   // 右半屏 Curator's Vault 策展核心邏輯 (V6.1 - Supabase 雲端同步)
   // ==========================================
 
+  const isDuplicateLookError = (error) =>
+    error?.code === '23505' || error?.message?.toLowerCase().includes('duplicate key');
+
   // 2. 點擊 `+ CURATE` 加入私人策展情緒板 (寫入 Supabase)
   const handleCurateLook = async (look) => {
     const { designer, season, look_number, image_url, source_url, instagram_handle } = look;
@@ -473,11 +509,11 @@ function App() {
         // triggerOracleAnalysis(inserted);
       } else {
         console.error("Supabase 新增錯誤:", error);
-        showToast("同步雲端失敗", "error");
+        showToast(isDuplicateLookError(error) ? "LOOK ALREADY CURATED" : "同步雲端失敗", isDuplicateLookError(error) ? "info" : "error");
       }
     } catch (err) {
       console.error("Supabase 新增異常:", err);
-      showToast("同步雲端出錯", "error");
+      showToast(isDuplicateLookError(err) ? "LOOK ALREADY CURATED" : "同步雲端出錯", isDuplicateLookError(err) ? "info" : "error");
     }
   };
 
@@ -566,11 +602,11 @@ function App() {
         showToast("DEMO EXAMPLES CURATED", "success");
       } else if (error) {
         console.error("Supabase 批次新增錯誤:", error);
-        showToast("同步雲端失敗", "error");
+        showToast(isDuplicateLookError(error) ? "EXAMPLES ALREADY CURATED" : "同步雲端失敗", isDuplicateLookError(error) ? "info" : "error");
       }
     } catch (err) {
       console.error("Supabase 批次新增異常:", err);
-      showToast("同步雲端出錯", "error");
+      showToast(isDuplicateLookError(err) ? "EXAMPLES ALREADY CURATED" : "同步雲端出錯", isDuplicateLookError(err) ? "info" : "error");
     }
   };
 

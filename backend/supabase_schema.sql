@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS archived_looks (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+-- 避免多分頁或 Realtime 競態造成同一品牌 / 季度 / Look 序號重複入庫
+CREATE UNIQUE INDEX IF NOT EXISTS archived_looks_unique_look
+ON archived_looks (LOWER(designer), LOWER(season), look_number);
+
 -- 3. （選填）開啟 RLS 安全存取機制
 ALTER TABLE collections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE archived_looks ENABLE ROW LEVEL SECURITY;

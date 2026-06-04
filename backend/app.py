@@ -40,8 +40,20 @@ log.setLevel(logging.ERROR)
 load_dotenv()
 
 app = Flask(__name__)
-# 允許跨網域請求，以便前端 React 順暢通訊
-CORS(app)
+
+def get_bool_env(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+# 允許跨網域請求，以便前端 React 順暢通訊；部署時可用 CORS_ORIGINS 逗號分隔限制來源。
+cors_origins = [
+    origin.strip()
+    for origin in os.environ.get(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173"
+    ).split(",")
+    if origin.strip()
+]
+CORS(app, resources={r"/api/*": {"origins": cors_origins}})
 
 # ==================================================
 # 核心 Vogue Runway 策展 API (V5.6)
@@ -113,8 +125,11 @@ def page_not_found(e):
     return jsonify({"error": "DEPRECATED ENDPOINT: This V4 auction monitor endpoint has been permanently purged in V5.6."}), 404
 
 if __name__ == '__main__':
+    host = os.environ.get("FLASK_HOST", "127.0.0.1")
+    port = int(os.environ.get("FLASK_PORT", "5001"))
+    debug = get_bool_env("FLASK_DEBUG", False)
+
     print("\033[90m[ SYSTEM ]\033[0m  LEGACY MODULES PURGED.")
     print("\033[90m[ SYSTEM ]\033[0m  ORACLE VISION ENGINE ONLINE.")
-    print("\033[90m[ SERVER ]\033[0m  THE SILENT ARCHIVE // PORT 5001 ONLINE.")
-    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5001)
-
+    print(f"\033[90m[ SERVER ]\033[0m  THE SILENT ARCHIVE // {host}:{port} ONLINE.")
+    app.run(debug=debug, use_reloader=False, host=host, port=port)

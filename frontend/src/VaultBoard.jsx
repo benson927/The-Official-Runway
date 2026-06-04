@@ -94,7 +94,7 @@ const VaultBoard = ({
           }
           .gallery {
             display: grid;
-            grid-template-cols: repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 40px;
           }
           .look-card {
