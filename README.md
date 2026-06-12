@@ -13,11 +13,14 @@
 
 ## 🎥 系統演示錄影 (System Demo Video)
 
-本專案包含了一段由開發者 **Benson** 親自錄製的操作演示影片。如果您是在 GitHub 網頁上閱讀此專案，可以直接在下方播放：
+本專案包含開發者錄製的完整操作影片，以及由 Agent Browser 執行的精簡流程錄影：
 
-https://github.com/benson927/The-Official-Runway/raw/main/Runway_record_show-1.mp4
+- [觀看完整系統操作影片](./Runway_demo_2026-06-12.mp4)
+- [觀看 Agent Browser 1280×720 精簡演示](./recordings/the-silent-archive-agent-browser-demo-1280x720.mp4)
 
-*(註：若您是在本地端閱讀 Markdown，可以直接點擊連結播放此 [Runway_record_show-1.mp4](file:///Users/bensonhong/Desktop/Antigravity專案/Runway(行動平台期末個人)/Runway_record_show-1.mp4) 本地影片檔案)*
+錄影涵蓋門禁解鎖、Runway 資料載入、Look 沉浸檢視、材質縮放、Noir 主題與 Vault 工作區。
+
+[開啟專案功能與發展分析簡報（PDF）](./the-silent-archive-project-analysis.pdf)
 
 ---
 

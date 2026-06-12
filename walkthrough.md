@@ -20,7 +20,9 @@
 
 為了完整展現 `THE SILENT ARCHIVE` 工作站的所有功能亮點與高奢暗黑美學，本專案包含了一段由開發者 **Benson** 本人親自錄製的操作演示影片：
 
-*   **官方演示錄影檔案**：[Runway_record_show-1.mp4](file:///Users/bensonhong/Desktop/Antigravity專案/Runway(行動平台期末個人)/Runway_record_show-1.mp4)
+*   **完整系統操作錄影**：[Runway_demo_2026-06-12.mp4](./Runway_demo_2026-06-12.mp4)
+*   **Agent Browser 精簡演示**：[the-silent-archive-agent-browser-demo-1280x720.mp4](./recordings/the-silent-archive-agent-browser-demo-1280x720.mp4)
+*   **專案功能與發展分析簡報**：[the-silent-archive-project-analysis.pdf](./the-silent-archive-project-analysis.pdf)
     *   *演示內容*：完整示範系統的蒙太奇密碼閘門解鎖、Benson 開發者副標示與註腳、一鍵 Noir 暗黑模式平滑切換、Runway 秀場大圖暗房顯影、60fps 滑鼠物理推擠與 Margelia Spec 特刊脈搏，以及金庫卡片策展、拖拽重新排列與 HTML 提案畫冊導出全流程。
 
 ---
